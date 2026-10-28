@@ -1,0 +1,79 @@
+
+.uml-class-node {
+    min-width: 200px;
+    background: #ffffff;
+    border: 1.5px solid #333333;
+    border-radius: 3px;
+    font-size: 13px;
+    color: #222222;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
+}
+
+.uml-class-node.selected {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18);
+}
+
+.uml-class-name {
+    padding: 12px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 600;
+    border-bottom: 1px solid #555555;
+}
+
+.uml-class-attributes,
+.uml-class-methods {
+    padding: 10px 12px;
+    min-height: 40px;
+    line-height: 1.8;
+    white-space: nowrap;
+}
+
+.uml-class-attributes {
+    border-bottom: 1px solid #555555;
+}
+
+.uml-placeholder {
+    color: #999999;
+    font-style: italic;
+}
+
+.uml-class-node .react-flow__handle {
+    width: 9px;
+    height: 9px;
+    background: #555555;
+    border: 2px solid #ffffff;
+}
+
+.uml-class-node .react-flow__handle:hover {
+    background: #2563eb;
+}
+
+/* 클래스 노드의 연결점 기준 */
+.uml-class-node {
+    position: relative;
+}
+
+/* 네 방향 연결점 */
+.uml-class-node .react-flow__handle {
+    width: 10px;
+    height: 10px;
+
+    background: #64748b;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+
+    cursor: crosshair;
+}
+
+/* 마우스가 올라갔을 때 */
+.uml-class-node .react-flow__handle:hover {
+    background: #2563eb;
+    transform: scale(1.25);
+}
+
+/* 연결 중인 Handle 강조 */
+.uml-class-node .react-flow__handle.connecting {
+    background: #2563eb;
+}
