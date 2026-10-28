@@ -7,7 +7,7 @@ import {
 
 import type {
     ClassDiagramNode,
-} from '../../types/diagram';
+} from './types.ts';
 
 import './ClassNode.css';
 

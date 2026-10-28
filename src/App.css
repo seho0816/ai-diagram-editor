@@ -172,3 +172,50 @@
 .delete-tool:hover:not(:disabled) {
   background: #fef2f2;
 }
+
+
+/* 도구 패널 스크롤 */
+.shape-sidebar {
+  overflow-y: auto;
+}
+
+/* 다이어그램 종류별 메뉴 */
+.diagram-tool-group {
+  margin-bottom: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.diagram-tool-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  border: none;
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.diagram-tool-header:hover {
+  background: #e2e8f0;
+}
+
+.diagram-tool-header span {
+  font-size: 10px;
+}
+
+.diagram-tool-content {
+  padding: 12px;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+}
+
+.sidebar-edit-section {
+  margin-top: 24px;
+}

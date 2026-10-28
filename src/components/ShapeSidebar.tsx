@@ -1,24 +1,29 @@
 
+import { useState } from 'react';
+
+import DiagramToolGroup from './DiagramToolGroup';
+
+import { classDiagramConfig } from
+        '../diagrams/class/config';
+
 import type {
+    DiagramType,
     UmlRelationType,
 } from '../types/diagram';
 
 type Props = {
+    diagramType?: DiagramType;
     onAddClass: () => void;
-
     relationType: UmlRelationType;
-    onSelectRelationType: (
-        type: UmlRelationType
-    ) => void;
-
+    onSelectRelationType: (type: UmlRelationType) => void;
     onApplyRelationToSelected: () => void;
     onDeleteSelected: () => void;
-
     hasSelectedEdge: boolean;
     hasSelection: boolean;
 };
 
 function ShapeSidebar({
+                          diagramType = 'CLASS',
                           onAddClass,
                           relationType,
                           onSelectRelationType,
@@ -27,89 +32,92 @@ function ShapeSidebar({
                           hasSelectedEdge,
                           hasSelection,
                       }: Props) {
+    const [expandedGroup, setExpandedGroup] =
+        useState<DiagramType | null>(diagramType);
+
+    const toggleGroup = (type: DiagramType) => {
+        setExpandedGroup((current) =>
+            current === type ? null : type
+        );
+    };
+
     return (
         <aside className="shape-sidebar">
             <h3>다이어그램 도구</h3>
 
-            {/* 클래스 생성 */}
-            <div className="tool-section">
-                <h4>클래스</h4>
+            <DiagramToolGroup
+                title="클래스"
+                isOpen={expandedGroup === 'CLASS'}
+                onToggle={() => toggleGroup('CLASS')}
+            >
+                <div className="tool-section">
+                    <h4>도형</h4>
+                    <button
+                        type="button"
+                        className="class-tool"
+                        onClick={onAddClass}
+                    >
+                        <div>ClassName</div>
+                        <div>attributes</div>
+                        <div>methods()</div>
+                    </button>
+                </div>
 
-                <button
-                    type="button"
-                    className="class-tool"
-                    onClick={onAddClass}
-                >
-                    <div>ClassName</div>
-                    <div>attributes</div>
-                    <div>methods()</div>
-                </button>
+                <div className="tool-section">
+                    <h4>관계선</h4>
 
-                <p>클릭하여 클래스 추가</p>
-            </div>
+                    {classDiagramConfig.tools.relations.map(
+                        (tool) => (
+                            <button
+                                key={tool.type}
+                                type="button"
+                                className={`relation-tool ${
+                                    relationType === tool.type
+                                        ? 'active'
+                                        : ''
+                                }`}
+                                onClick={() =>
+                                    onSelectRelationType(tool.type)
+                                }
+                                aria-pressed={
+                                    relationType === tool.type
+                                }
+                            >
+                <span className="relation-symbol">
+                  {tool.type === 'association'
+                      ? '────'
+                      : '──▷'}
+                </span>
+                                {tool.label}
+                            </button>
+                        )
+                    )}
 
-            {/* 관계선 종류 선택 */}
-            <div className="tool-section">
-                <h4>관계선</h4>
+                    <button
+                        type="button"
+                        className="sidebar-action-button"
+                        onClick={onApplyRelationToSelected}
+                        disabled={!hasSelectedEdge}
+                    >
+                        선택한 관계선 종류 변경
+                    </button>
+                </div>
+            </DiagramToolGroup>
 
-                <button
-                    type="button"
-                    className={`relation-tool ${
-                        relationType === 'association'
-                            ? 'active'
-                            : ''
-                    }`}
-                    aria-pressed={
-                        relationType === 'association'
-                    }
-                    onClick={() =>
-                        onSelectRelationType('association')
-                    }
-                >
-          <span className="relation-symbol">
-            ─────
-          </span>
-                    <span>연관</span>
-                </button>
+            <DiagramToolGroup
+                title="유스케이스"
+                isOpen={expandedGroup === 'USE_CASE'}
+                onToggle={() => toggleGroup('USE_CASE')}
+            />
 
-                <button
-                    type="button"
-                    className={`relation-tool ${
-                        relationType === 'generalization'
-                            ? 'active'
-                            : ''
-                    }`}
-                    aria-pressed={
-                        relationType === 'generalization'
-                    }
-                    onClick={() =>
-                        onSelectRelationType('generalization')
-                    }
-                >
-          <span className="relation-symbol">
-            ───▷
-          </span>
-                    <span>상속</span>
-                </button>
+            <DiagramToolGroup
+                title="플로우차트"
+                isOpen={expandedGroup === 'FLOWCHART'}
+                onToggle={() => toggleGroup('FLOWCHART')}
+            />
 
-                <p>
-                    관계 종류를 선택한 뒤
-                    노드의 연결점을 드래그하세요.
-                </p>
-
-                <button
-                    type="button"
-                    className="sidebar-action-button"
-                    onClick={onApplyRelationToSelected}
-                    disabled={!hasSelectedEdge}
-                >
-                    선택한 관계선 종류 변경
-                </button>
-            </div>
-
-            {/* 요소 삭제 */}
-            <div className="tool-section">
-                <h4>편집</h4>
+            <div className="tool-section sidebar-edit-section">
+                <h4>공통 편집</h4>
 
                 <button
                     type="button"
@@ -119,8 +127,6 @@ function ShapeSidebar({
                 >
                     선택한 요소 삭제
                 </button>
-
-                <p>Delete / Backspace 사용 가능</p>
             </div>
         </aside>
     );

@@ -5,7 +5,7 @@ import type {
     DiagramNode,
 } from '../../types/diagram';
 
-import ClassEditForm from './forms/ClassEditForm';
+import ClassEditForm from '../../diagrams/class/ClassEditForm.tsx';
 
 import './NodeEditModal.css';
 

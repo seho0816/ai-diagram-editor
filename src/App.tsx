@@ -16,6 +16,9 @@ import type {
   UmlRelationType,
 } from './types/diagram';
 
+import type { DiagramType } from './types/diagram';
+import { classDiagramConfig } from './diagrams/class/config';
+
 import TopToolbar from './components/TopToolbar';
 import ShapeSidebar from './components/ShapeSidebar';
 import DiagramCanvas from './components/DiagramCanvas';
@@ -79,6 +82,10 @@ const initialEdges: DiagramEdge[] = [
 ];
 
 function App() {
+  // 현재 사용 중인 다이어그램 종류
+  const diagramType: DiagramType =
+      classDiagramConfig.diagramType;
+
   // 노드 상태
   const [nodes, setNodes, onNodesChange] =
       useNodesState<DiagramNode>(
@@ -253,6 +260,7 @@ function App() {
 
         <div className="editor-layout">
           <ShapeSidebar
+              diagramType={diagramType}
               onAddClass={addClass}
               relationType={relationType}
               onSelectRelationType={setRelationType}

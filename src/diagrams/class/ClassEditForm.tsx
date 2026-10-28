@@ -3,7 +3,7 @@ import { useState, type SubmitEvent } from 'react';
 
 import type {
     ClassDiagramNode,
-} from '../../../types/diagram';
+} from './types.ts';
 
 type Props = {
     node: ClassDiagramNode;

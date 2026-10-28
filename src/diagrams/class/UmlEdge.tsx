@@ -6,8 +6,8 @@ import {
 } from '@xyflow/react';
 
 import type {
-    DiagramEdge,
-} from '../../types/diagram';
+    UmlDiagramEdge,
+} from './types.ts';
 
 function UmlEdge({
                      id,
@@ -19,7 +19,7 @@ function UmlEdge({
                      targetPosition,
                      data,
                      selected,
-                 }: EdgeProps<DiagramEdge>) {
+                 }: EdgeProps<UmlDiagramEdge>) {
 
     // 관계선의 SVG 경로 계산
     const [edgePath] = getSmoothStepPath({

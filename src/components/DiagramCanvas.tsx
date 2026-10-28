@@ -11,9 +11,6 @@ import {
     type NodeMouseHandler,
 } from '@xyflow/react';
 
-import ClassNode from './nodes/ClassNode';
-import UmlEdge from './edges/UmlEdge';
-
 import type {
     DiagramNode,
     DiagramEdge,
@@ -21,13 +18,12 @@ import type {
 
 import '@xyflow/react/dist/style.css';
 
-const nodeTypes = {
-    classNode: ClassNode,
-};
+import {
+    classDiagramConfig,
+} from '../diagrams/class/config';
 
-const edgeTypes = {
-    umlEdge: UmlEdge,
-};
+const nodeTypes = classDiagramConfig.nodeTypes;
+const edgeTypes = classDiagramConfig.edgeTypes;
 
 type Props = {
     nodes: DiagramNode[];
