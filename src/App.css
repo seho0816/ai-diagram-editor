@@ -219,3 +219,32 @@
 .sidebar-edit-section {
   margin-top: 24px;
 }
+
+/* 사이드바 아이콘 카드 스타일 */
+.shape-card-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 4px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  color: #334155;
+}
+
+.shape-card-btn:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.shape-card-btn span {
+  font-size: 11px;
+  font-weight: 500;
+  color: #475569;
+}

@@ -1,47 +1,56 @@
-import type {
-    ClassDiagramNode,
-    UmlDiagramEdge,
-    UmlRelationType as ClassRelationType,
-} from '../diagrams/class/types';
+import type { Node, Edge } from '@xyflow/react';
 
-import type {
-    ActorNode,
-    UseCaseNode,
-    BoundaryNode,
-    UseCaseRelationType,
-} from '../diagrams/USE_CASE/types';
+// 다이어그램 종류 (대소문자 및 문자열 모두 허용)
+export type DiagramType = 'class' | 'usecase' | 'sequence' | 'CLASS' | 'USE_CASE' | 'FLOWCHART' | string;
 
-export type {
-    ClassDiagramNode,
-    ClassNodeData,
-    UmlEdgeData,
-    UmlDiagramEdge,
-} from '../diagrams/class/types';
+// 노드 데이터 인터페이스
+export interface ClassDiagramNodeData {
+  className: string;
+  attributes: string[];
+  methods: string[];
+  [key: string]: unknown;
+}
 
-export type {
-    ActorNode,
-    UseCaseNode,
-    BoundaryNode,
-    ActorNodeData,
-    UseCaseNodeData,
-    BoundaryNodeData,
-} from '../diagrams/USE_CASE/types';
+export interface ActorNodeData {
+  label: string;
+  [key: string]: unknown;
+}
 
-export type DiagramType =
-    | 'CLASS'
-    | 'USE_CASE'
-    | 'FLOWCHART';
+export interface UseCaseNodeData {
+  label: string;
+  [key: string]: unknown;
+}
 
-// 관계선 타입 통합 (기존 연관/상속 + 유스케이스 포함/확장)
-export type UmlRelationType =
-    | ClassRelationType
-    | UseCaseRelationType;
+export interface BoundaryNodeData {
+  title: string;
+  width: number;
+  height: number;
+  [key: string]: unknown;
+}
 
-// 전체 노드 및 엣지 타입 통합
+// 각 노드 및 에지 타입
+export type ClassDiagramNode = Node<ClassDiagramNodeData, 'classNode'>;
+export type ActorNode = Node<ActorNodeData, 'actorNode'>;
+export type UseCaseNode = Node<UseCaseNodeData, 'useCaseNode'>;
+export type BoundaryNode = Node<BoundaryNodeData, 'boundaryNode'>;
+
 export type DiagramNode =
-    | ClassDiagramNode
-    | ActorNode
-    | UseCaseNode
-    | BoundaryNode;
+  | ClassDiagramNode
+  | ActorNode
+  | UseCaseNode
+  | BoundaryNode;
 
-export type DiagramEdge = UmlDiagramEdge;
+export type UmlRelationType =
+  | 'association'
+  | 'generalization'
+  | 'dependency'
+  | 'include'
+  | 'extend'
+  | string;
+
+export interface UmlEdgeData {
+  relationType: UmlRelationType;
+  [key: string]: unknown;
+}
+
+export type DiagramEdge = Edge<UmlEdgeData, 'umlEdge'>;

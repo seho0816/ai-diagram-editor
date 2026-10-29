@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 
 import type {
     DiagramNode,
+    ClassDiagramNode,
 } from '../../types/diagram';
 
 import ClassEditForm from '../../diagrams/class/ClassEditForm.tsx';
@@ -42,14 +43,17 @@ function NodeEditModal({
     // 노드 종류에 따라 편집 폼 선택
     const renderEditForm = () => {
         switch (node.type) {
-            case 'classNode':
+            case 'classNode': {
+                const classNode = node as ClassDiagramNode;
+
                 return (
                     <ClassEditForm
-                        node={node}
+                        node={classNode}
                         onSave={onSave}
                         onCancel={onClose}
                     />
                 );
+            }
 
             // 추후 추가할 노드 종류
             // case 'flowchartNode':
