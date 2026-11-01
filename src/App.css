@@ -219,3 +219,113 @@
 .sidebar-edit-section {
   margin-top: 24px;
 }
+
+
+/* AI 분석 사이드 패널 */
+.ai-panel {
+  width: 350px;
+  flex-shrink: 0;
+  height: 100%;
+  padding: 18px;
+  overflow-y: auto;
+  border-left: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #1f2937;
+}
+
+.ai-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.ai-panel-header h3 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.ai-panel-header button {
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  border-radius: 5px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.ai-panel label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.ai-panel textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.ai-analyze-button {
+  width: 100%;
+  margin-top: 12px;
+  padding: 11px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.ai-analyze-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ai-results {
+  margin-top: 24px;
+}
+
+.ai-results h4 {
+  font-size: 14px;
+  margin: 20px 0 10px;
+}
+
+.ai-results p {
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.ai-issue {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 14px;
+  margin-top: 12px;
+}
+
+.ai-issue-kind {
+  font-size: 11px;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.ai-issue h5 {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.ai-issue small {
+  color: #64748b;
+}
+
+.ai-issue strong {
+  font-size: 12px;
+}
+
+.ai-error {
+  color: #dc2626;
+}

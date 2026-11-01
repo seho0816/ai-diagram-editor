@@ -9,6 +9,7 @@ import {
     type OnEdgesChange,
     type OnConnect,
     type NodeMouseHandler,
+    type EdgeMouseHandler,
 } from '@xyflow/react';
 
 import type {
@@ -33,6 +34,7 @@ type Props = {
     onConnect: OnConnect;
     onNodeDoubleClick: NodeMouseHandler<DiagramNode>;
     enableDelete: boolean;
+    onEdgeDoubleClick: EdgeMouseHandler<DiagramEdge>;
 };
 
 function DiagramCanvas({
@@ -42,6 +44,7 @@ function DiagramCanvas({
                            onEdgesChange,
                            onConnect,
                            onNodeDoubleClick,
+                           onEdgeDoubleClick,
                            enableDelete,
                        }: Props) {
     return (
@@ -56,6 +59,7 @@ function DiagramCanvas({
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
                 onNodeDoubleClick={onNodeDoubleClick}
+                onEdgeDoubleClick={onEdgeDoubleClick}
 
                 connectionMode={ConnectionMode.Loose}
                 connectionLineType={ConnectionLineType.SmoothStep}

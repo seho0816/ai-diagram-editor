@@ -67,7 +67,8 @@
 }
 
 .node-edit-field input,
-.node-edit-field textarea {
+.node-edit-field textarea,
+.node-edit-field select {
     width: 100%;
     padding: 10px 12px;
 

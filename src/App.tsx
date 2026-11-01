@@ -17,6 +17,9 @@ import type {
 } from './types/diagram';
 
 import type { DiagramType } from './types/diagram';
+import AiPanel from './components/AiPanel';
+import { analyzeDiagram } from './api/ai';
+import type { AiAnalysisResult } from './types/ai';
 import { classDiagramConfig } from './diagrams/class/config';
 
 import TopToolbar from './components/TopToolbar';
@@ -24,7 +27,15 @@ import ShapeSidebar from './components/ShapeSidebar';
 import DiagramCanvas from './components/DiagramCanvas';
 import NodeEditModal from './components/editor/NodeEditModal';
 
+import type { EdgeMouseHandler } from '@xyflow/react';
+
+import UmlEdgeEditModal from './diagrams/class/UmlEdgeEditModal';
+
+import type { UmlEdgeData } from
+      './diagrams/class/types';
+
 import './App.css';
+
 
 // 초기 클래스 노드
 const initialNodes: DiagramNode[] = [
@@ -97,7 +108,25 @@ function App() {
       useEdgesState<DiagramEdge>(
           structuredClone(initialEdges)
       );
+  
+  // 관계선 편집 상태
+  const [editingEdgeId, setEditingEdgeId] =
+      useState<string | null>(null);
 
+  const editingEdge = edges.find(
+      (edge) => edge.id === editingEdgeId
+  );
+
+  // 관계선 더블클릭
+  const handleEdgeDoubleClick:
+      EdgeMouseHandler<DiagramEdge> = (
+      _event,
+      edge
+  ) => {
+    setEditingNodeId(null);
+    setEditingEdgeId(edge.id);
+  };
+  
   // 현재 선택한 관계 종류
   const [relationType, setRelationType] =
       useState<UmlRelationType>('association');
@@ -176,6 +205,7 @@ function App() {
       node
   ) => {
     setEditingNodeId(node.id);
+    setEditingEdgeId(null);
   };
 
   // 노드 수정 내용 저장
@@ -195,6 +225,27 @@ function App() {
     );
 
     setEditingNodeId(null);
+  };
+
+  const handleSaveEdge = (
+      edgeId: string,
+      updatedData: UmlEdgeData
+  ) => {
+    setEdges((current) =>
+        current.map((edge) =>
+            edge.id === edgeId
+                ? {
+                  ...edge,
+                  data: {
+                    ...edge.data,
+                    ...updatedData,
+                  },
+                }
+                : edge
+        )
+    );
+
+    setEditingEdgeId(null);
   };
 
   // 모달 닫기
@@ -249,14 +300,85 @@ function App() {
   const resetDiagram = () => {
     setEditingNodeId(null);
     setRelationType('association');
-
+    setEditingEdgeId(null);
     setNodes(structuredClone(initialNodes));
     setEdges(structuredClone(initialEdges));
   };
 
+  const [diagramPurpose, setDiagramPurpose] =
+      useState('쇼핑몰 주문 시스템');
+
+  const [aiPanelOpen, setAiPanelOpen] = useState(false);
+
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const [aiError, setAiError] =
+      useState<string | null>(null);
+
+  const [aiResult, setAiResult] =
+      useState<AiAnalysisResult | null>(null);
+
+  const runAiAnalysis = async () => {
+    setAiPanelOpen(true);
+
+    if (aiLoading) return;
+
+    if (!diagramPurpose.trim()) {
+      setAiError('설계 목적을 입력해 주세요.');
+      return;
+    }
+
+    if (nodes.length === 0) {
+      setAiError('분석할 클래스가 없습니다.');
+      return;
+    }
+
+    setAiLoading(true);
+    setAiError(null);
+    setAiResult(null);
+
+    try {
+      const result = await analyzeDiagram({
+        diagramType: classDiagramConfig.diagramType,
+        purpose: diagramPurpose,
+
+        nodes: nodes.map((node) => ({
+          id: node.id,
+          type: node.type,
+          position: node.position,
+          data: node.data,
+        })),
+
+        edges: edges.map((edge) => ({
+          id: edge.id,
+          type: edge.type,
+          source: edge.source,
+          target: edge.target,
+          sourceHandle: edge.sourceHandle,
+          targetHandle: edge.targetHandle,
+          data: edge.data,
+        })),
+      });
+
+      setAiResult(result);
+    } catch (error) {
+      setAiError(
+          error instanceof Error
+              ? error.message
+              : 'AI 분석 중 오류가 발생했습니다.'
+      );
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   return (
       <div className="app">
-        <TopToolbar onReset={resetDiagram} />
+        <TopToolbar
+            onReset={resetDiagram}
+            onAnalyze={runAiAnalysis}
+            analyzing={aiLoading}
+        />
 
         <div className="editor-layout">
           <ShapeSidebar
@@ -279,10 +401,24 @@ function App() {
               onEdgesChange={onEdgesChange}
               onConnect={onConnect}
               onNodeDoubleClick={handleNodeDoubleClick}
-              enableDelete={editingNodeId === null}
+              enableDelete={
+                  editingNodeId === null &&
+                  editingEdgeId === null
+              }
+              onEdgeDoubleClick={handleEdgeDoubleClick}
           />
         </div>
-
+        {aiPanelOpen && (
+            <AiPanel
+                purpose={diagramPurpose}
+                onPurposeChange={setDiagramPurpose}
+                result={aiResult}
+                loading={aiLoading}
+                error={aiError}
+                onAnalyze={runAiAnalysis}
+                onClose={() => setAiPanelOpen(false)}
+            />
+        )}
         {/* 공통 노드 편집 모달 */}
         {editingNode && (
             <NodeEditModal
@@ -291,6 +427,14 @@ function App() {
                 onSave={handleSaveNode}
                 onClose={closeEditModal}
             />
+        )}
+        {editingEdge && (
+          <UmlEdgeEditModal
+          key={editingEdge.id}
+        edge={editingEdge}
+        onSave={handleSaveEdge}
+        onClose={() => setEditingEdgeId(null)}
+      />
         )}
       </div>
   );

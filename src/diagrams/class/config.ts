@@ -20,6 +20,9 @@ export const classDiagramConfig = {
         relations: [
             { type: 'association', label: '연관' },
             { type: 'generalization', label: '상속' },
+            { type: 'aggregation', label: '집합' },
+            { type: 'composition', label: '합성' },
+            { type: 'dependency', label: '의존' },
         ],
     },
 } as const;

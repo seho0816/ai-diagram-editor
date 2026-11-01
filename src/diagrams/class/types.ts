@@ -12,12 +12,22 @@ export type ClassDiagramNode = Node<
     'classNode'
 >;
 
+
 export type UmlRelationType =
     | 'association'
-    | 'generalization';
+    | 'generalization'
+    | 'aggregation'
+    | 'composition'
+    | 'dependency';
 
 export type UmlEdgeData = {
     relationType: UmlRelationType;
+
+    // 시작 클래스 가까이에 표시할 다중성
+    sourceMultiplicity?: string;
+
+    // 도착 클래스 가까이에 표시할 다중성
+    targetMultiplicity?: string;
 };
 
 export type UmlDiagramEdge = Edge<

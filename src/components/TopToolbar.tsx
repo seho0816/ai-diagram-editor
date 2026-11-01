@@ -1,9 +1,15 @@
 
 type Props = {
     onReset: () => void;
+    onAnalyze: () => void;
+    analyzing: boolean;
 };
 
-function TopToolbar({ onReset }: Props) {
+function TopToolbar({
+                        onReset,
+                        onAnalyze,
+                        analyzing,
+                    }: Props) {
     return (
         <header className="top-toolbar">
             <div className="toolbar-left">
@@ -12,8 +18,15 @@ function TopToolbar({ onReset }: Props) {
             </div>
 
             <div className="toolbar-right">
-                <button disabled>저장 (준비 중)</button>
-                <button disabled>AI 분석 (준비 중)</button>
+                <button disabled>저장</button>
+
+                <button
+                    type="button"
+                    onClick={onAnalyze}
+                    disabled={analyzing}
+                >
+                    {analyzing ? '분석 중...' : 'AI 분석'}
+                </button>
             </div>
         </header>
     );

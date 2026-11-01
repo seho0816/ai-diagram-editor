@@ -22,6 +22,14 @@ type Props = {
     hasSelection: boolean;
 };
 
+const relationSymbols: Record<UmlRelationType, string> = {
+    association: '────',
+    generalization: '──▷',
+    aggregation: '──◇',
+    composition: '──◆',
+    dependency: '┄┄>',
+};
+
 function ShapeSidebar({
                           diagramType = 'CLASS',
                           onAddClass,
@@ -84,9 +92,7 @@ function ShapeSidebar({
                                 }
                             >
                 <span className="relation-symbol">
-                  {tool.type === 'association'
-                      ? '────'
-                      : '──▷'}
+                    {relationSymbols[tool.type]}
                 </span>
                                 {tool.label}
                             </button>
