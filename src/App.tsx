@@ -13,11 +13,17 @@ import type {
   DiagramEdge,
   ClassDiagramNode,
   UmlDiagramEdge,
+  FlowchartDiagramNode,
+  FlowchartDiagramEdge,
+  FlowchartRelationType,
+  FlowchartShape,
+  UseCaseRelationType,
   UmlRelationType,
 } from './types/diagram';
 
 import type { DiagramType } from './types/diagram';
 import { classDiagramConfig } from './diagrams/class/config';
+import { flowchartDiagramConfig } from './diagrams/flowchart/config';
 
 import TopToolbar from './components/TopToolbar';
 import ShapeSidebar from './components/ShapeSidebar';
@@ -81,10 +87,57 @@ const initialEdges: DiagramEdge[] = [
   },
 ];
 
+const initialFlowchartNodes: DiagramNode[] = [
+  {
+    id: 'flow-start',
+    type: 'flowchartNode',
+    position: { x: 100, y: 120 },
+    data: { shape: 'startEnd', label: '시작' },
+  },
+  {
+    id: 'flow-process',
+    type: 'flowchartNode',
+    position: { x: 340, y: 120 },
+    data: { shape: 'process', label: '처리' },
+  },
+  {
+    id: 'flow-end',
+    type: 'flowchartNode',
+    position: { x: 580, y: 120 },
+    data: { shape: 'startEnd', label: '종료' },
+  },
+];
+
+const initialFlowchartEdges: DiagramEdge[] = [
+  {
+    id: 'flow-start-process',
+    source: 'flow-start',
+    target: 'flow-process',
+    type: 'flowchartEdge',
+    data: { relationType: 'flow' },
+  },
+  {
+    id: 'flow-process-end',
+    source: 'flow-process',
+    target: 'flow-end',
+    type: 'flowchartEdge',
+    data: { relationType: 'flow' },
+  },
+];
+
+type DiagramRelationType =
+  | UmlRelationType
+  | FlowchartRelationType
+  | UseCaseRelationType;
+
+function isFlowchartEdge(edge: DiagramEdge): edge is FlowchartDiagramEdge {
+  return edge.type === 'flowchartEdge';
+}
+
 function App() {
-  // 현재 사용 중인 다이어그램 종류
-  const diagramType: DiagramType =
-      classDiagramConfig.diagramType;
+  const [diagramType, setDiagramType] = useState<DiagramType>(
+    classDiagramConfig.diagramType
+  );
 
   // 노드 상태
   const [nodes, setNodes, onNodesChange] =
@@ -100,7 +153,7 @@ function App() {
 
   // 현재 선택한 관계 종류
   const [relationType, setRelationType] =
-      useState<UmlRelationType>('association');
+      useState<DiagramRelationType>('association');
 
   // 편집 중인 노드 ID
   const [editingNodeId, setEditingNodeId] =
@@ -123,6 +176,26 @@ function App() {
 
   const onConnect = useCallback(
       (connection: Connection) => {
+        if (diagramType === 'FLOWCHART') {
+          const flowRelation: FlowchartRelationType =
+            relationType === 'yes' || relationType === 'no' || relationType === 'flow'
+              ? relationType
+              : 'flow';
+          const newEdge: FlowchartDiagramEdge = {
+            id: crypto.randomUUID(),
+            source: connection.source,
+            sourceHandle: connection.sourceHandle,
+            target: connection.target,
+            targetHandle: connection.targetHandle,
+            type: 'flowchartEdge',
+            data: { relationType: flowRelation },
+          };
+          setEdges((current) => [...current, newEdge]);
+          return;
+        }
+
+        const umlRelation: UmlRelationType =
+          relationType === 'generalization' ? 'generalization' : 'association';
         const newEdge: UmlDiagramEdge = {
           id: crypto.randomUUID(),
 
@@ -137,14 +210,14 @@ function App() {
           type: 'umlEdge',
 
           data: {
-            relationType,
+            relationType: umlRelation,
           },
         };
 
         // UML의 의미가 맞는지 검사하지 않고 추가
         setEdges((current) => [...current, newEdge]);
       },
-      [setEdges, relationType]
+      [setEdges, relationType, diagramType]
   );
 
 
@@ -169,6 +242,29 @@ function App() {
     });
   };
 
+  const addFlowchartNode = (shape: FlowchartShape) => {
+    setNodes((current) => {
+      const flowchartNodes = current.filter(
+        (node) => node.type === 'flowchartNode'
+      );
+      const newNode: FlowchartDiagramNode = {
+        id: crypto.randomUUID(),
+        type: 'flowchartNode',
+        position: {
+          x: 160 + (flowchartNodes.length % 3) * 210,
+          y: 100 + Math.floor(flowchartNodes.length / 3) * 140,
+        },
+        data: {
+          shape,
+          label: flowchartDiagramConfig.tools.nodes.find(
+            (tool) => tool.type === shape
+          )?.label ?? '새 도형',
+        },
+      };
+      return [...current, newNode];
+    });
+  };
+
   // 노드 더블클릭 시 편집
   const handleNodeDoubleClick:
       NodeMouseHandler<DiagramNode> = (
@@ -184,12 +280,8 @@ function App() {
   ) => {
     setNodes((current) =>
         current.map((node) =>
-            node.id === updatedNode.id &&
-            node.type === updatedNode.type
-                ? {
-                  ...node,
-                  data: updatedNode.data,
-                }
+            node.id === updatedNode.id
+                ? updatedNode
                 : node
         )
     );
@@ -210,11 +302,25 @@ function App() {
             return edge;
           }
 
+          if (isFlowchartEdge(edge)) {
+            const flowRelation: FlowchartRelationType =
+              relationType === 'yes' || relationType === 'no' || relationType === 'flow'
+                ? relationType
+                : 'flow';
+            return {
+              ...edge,
+              data: { ...edge.data, relationType: flowRelation },
+            };
+          }
+
           return {
             ...edge,
             data: {
               ...edge.data,
-              relationType,
+              relationType:
+                relationType === 'generalization'
+                  ? 'generalization'
+                  : 'association',
             },
           };
         })
@@ -246,22 +352,37 @@ function App() {
   };
 
   // 다이어그램 초기화
-  const resetDiagram = () => {
+  const resetDiagram = (type: DiagramType = diagramType) => {
     setEditingNodeId(null);
-    setRelationType('association');
+    if (type === 'FLOWCHART') {
+      setRelationType('flow');
+      setNodes(structuredClone(initialFlowchartNodes));
+      setEdges(structuredClone(initialFlowchartEdges));
+    } else {
+      setRelationType('association');
+      setNodes(structuredClone(initialNodes));
+      setEdges(structuredClone(initialEdges));
+    }
+  };
 
-    setNodes(structuredClone(initialNodes));
-    setEdges(structuredClone(initialEdges));
+  const changeDiagramType = (type: DiagramType) => {
+    setDiagramType(type);
+    resetDiagram(type);
   };
 
   return (
       <div className="app">
-        <TopToolbar onReset={resetDiagram} />
+        <TopToolbar
+          onReset={() => resetDiagram()}
+          diagramType={diagramType}
+          onDiagramTypeChange={changeDiagramType}
+        />
 
         <div className="editor-layout">
           <ShapeSidebar
               diagramType={diagramType}
               onAddClass={addClass}
+              onAddFlowchartNode={addFlowchartNode}
               relationType={relationType}
               onSelectRelationType={setRelationType}
               onApplyRelationToSelected={

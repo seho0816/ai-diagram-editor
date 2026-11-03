@@ -21,9 +21,16 @@ import '@xyflow/react/dist/style.css';
 import {
     classDiagramConfig,
 } from '../diagrams/class/config';
+import { flowchartDiagramConfig } from '../diagrams/flowchart/config';
 
-const nodeTypes = classDiagramConfig.nodeTypes;
-const edgeTypes = classDiagramConfig.edgeTypes;
+const nodeTypes = {
+    ...classDiagramConfig.nodeTypes,
+    ...flowchartDiagramConfig.nodeTypes,
+};
+const edgeTypes = {
+    ...classDiagramConfig.edgeTypes,
+    ...flowchartDiagramConfig.edgeTypes,
+};
 
 type Props = {
     nodes: DiagramNode[];

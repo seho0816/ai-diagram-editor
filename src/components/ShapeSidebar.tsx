@@ -1,9 +1,21 @@
 import { useState } from 'react';
+import type { DragEvent } from 'react';
 import DiagramToolGroup from './DiagramToolGroup';
 import { classDiagramConfig } from '../diagrams/class/config';
-import { useCaseDiagramConfig } from '../diagrams/USE_CASE/config';
+import { flowchartDiagramConfig } from '../diagrams/flowchart/config';
 
-import type { DiagramType, UmlRelationType } from '../types/diagram';
+import type {
+  DiagramType,
+  FlowchartRelationType,
+  FlowchartShape,
+  UseCaseRelationType,
+  UmlRelationType,
+} from '../types/diagram';
+
+type RelationType =
+  | UmlRelationType
+  | FlowchartRelationType
+  | UseCaseRelationType;
 
 export interface ShapeSidebarProps {
   diagramType?: DiagramType;
@@ -11,13 +23,22 @@ export interface ShapeSidebarProps {
   onAddActor?: () => void;
   onAddUseCase?: () => void;
   onAddBoundary?: () => void;
-  relationType: UmlRelationType;
-  onSelectRelationType: (type: any) => void;
+  onAddFlowchartNode: (shape: FlowchartShape) => void;
+  relationType: RelationType;
+  onSelectRelationType: (type: RelationType) => void;
   onApplyRelationToSelected: () => void;
   onDeleteSelected: () => void;
   hasSelectedEdge: boolean;
   hasSelection: boolean;
 }
+
+// 유스케이스 관계선 내부 정의 (외부 config 에러 방지)
+const useCaseRelations: { type: UseCaseRelationType; label: string }[] = [
+  { type: 'association', label: '연관 관계' },
+  { type: 'include', label: '포함 관계 (<<include>>)' },
+  { type: 'extend', label: '확장 관계 (<<extend>>)' },
+  { type: 'generalization', label: '일반화 관계' },
+];
 
 function ShapeSidebar({
   diagramType = 'CLASS',
@@ -25,6 +46,7 @@ function ShapeSidebar({
   onAddActor,
   onAddUseCase,
   onAddBoundary,
+  onAddFlowchartNode,
   relationType,
   onSelectRelationType,
   onApplyRelationToSelected,
@@ -40,21 +62,34 @@ function ShapeSidebar({
     setExpandedGroup((current) => (current === groupKey ? null : groupKey));
   };
 
+  const onDragStart = (event: DragEvent<HTMLButtonElement>, nodeType: string) => {
+    event.dataTransfer.setData('application/reactflow', nodeType);
+    event.dataTransfer.effectAllowed = 'move';
+  };
+
   return (
     <aside className="shape-sidebar">
       <h3 style={{ margin: '12px 16px', fontSize: '16px', fontWeight: 600 }}>
         다이어그램 도구
       </h3>
 
+      {diagramType !== 'FLOWCHART' ? (
+        <>
       {/* 1. 클래스 다이어그램 */}
       <DiagramToolGroup
         title="클래스"
         isOpen={expandedGroup === 'class' || expandedGroup === 'CLASS'}
-        onToggle={() => toggleGroup('class')}
+        onToggle={() => toggleGroup('CLASS')}
       >
         <div className="tool-section">
           <h4>도형</h4>
-          <button type="button" className="class-tool" onClick={onAddClass}>
+          <button
+            type="button"
+            className="class-tool"
+            onClick={onAddClass}
+            draggable
+            onDragStart={(e) => onDragStart(e, 'class')}
+          >
             <div style={{ fontWeight: 'bold' }}>ClassName</div>
             <div style={{ fontSize: '11px', color: '#666' }}>+ attributes</div>
             <div style={{ fontSize: '11px', color: '#666' }}>+ methods()</div>
@@ -81,11 +116,11 @@ function ShapeSidebar({
         </div>
       </DiagramToolGroup>
 
-      {/* 2. 유스케이스 다이어그램 (draw.io 라이브러리 스타일) */}
+      {/* 2. 유스케이스 다이어그램 */}
       <DiagramToolGroup
         title="유스케이스"
         isOpen={expandedGroup === 'usecase' || expandedGroup === 'USE_CASE'}
-        onToggle={() => toggleGroup('usecase')}
+        onToggle={() => toggleGroup('USE_CASE')}
       >
         <div className="tool-section">
           <h4>요소 라이브러리</h4>
@@ -102,6 +137,8 @@ function ShapeSidebar({
               type="button"
               className="shape-card-btn"
               onClick={onAddActor}
+              draggable
+              onDragStart={(e) => onDragStart(e, 'actor')}
               title="사용자/시스템 액터"
             >
               <svg width="24" height="28" viewBox="0 0 24 32" fill="none" stroke="currentColor" strokeWidth="2">
@@ -116,6 +153,8 @@ function ShapeSidebar({
               type="button"
               className="shape-card-btn"
               onClick={onAddUseCase}
+              draggable
+              onDragStart={(e) => onDragStart(e, 'usecase')}
               title="유스케이스 타원"
             >
               <svg width="32" height="20" viewBox="0 0 40 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -129,6 +168,8 @@ function ShapeSidebar({
               type="button"
               className="shape-card-btn"
               onClick={onAddBoundary}
+              draggable
+              onDragStart={(e) => onDragStart(e, 'boundary')}
               title="시스템 경계 (System Boundary)"
             >
               <svg width="28" height="24" viewBox="0 0 32 28" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 2">
@@ -142,6 +183,8 @@ function ShapeSidebar({
               type="button"
               className="shape-card-btn"
               onClick={onAddBoundary}
+              draggable
+              onDragStart={(e) => onDragStart(e, 'boundary')}
               title="서브시스템 컴포넌트"
             >
               <svg width="28" height="24" viewBox="0 0 32 28" fill="none" stroke="currentColor" strokeWidth="2">
@@ -156,6 +199,8 @@ function ShapeSidebar({
               type="button"
               className="shape-card-btn"
               onClick={onAddActor}
+              draggable
+              onDragStart={(e) => onDragStart(e, 'actor')}
               title="외부 시스템 / 데이터베이스"
             >
               <svg width="28" height="24" viewBox="0 0 32 28" fill="none" stroke="currentColor" strokeWidth="2">
@@ -170,6 +215,8 @@ function ShapeSidebar({
               type="button"
               className="shape-card-btn"
               onClick={onAddUseCase}
+              draggable
+              onDragStart={(e) => onDragStart(e, 'usecase')}
               title="주석 노트"
             >
               <svg width="24" height="26" viewBox="0 0 28 30" fill="none" stroke="currentColor" strokeWidth="2">
@@ -183,7 +230,7 @@ function ShapeSidebar({
 
         <div className="tool-section">
           <h4>관계선 (Relations)</h4>
-          {useCaseDiagramConfig.tools.relations.map((tool) => (
+          {useCaseRelations.map((tool) => (
             <button
               key={tool.type}
               type="button"
@@ -197,7 +244,7 @@ function ShapeSidebar({
                   ? '────'
                   : tool.type === 'generalization'
                   ? '──▷'
-                  : ' - -▷'}
+                  : ' - - -►'}
               </span>
               {tool.label}
             </button>
@@ -214,6 +261,52 @@ function ShapeSidebar({
           </button>
         </div>
       </DiagramToolGroup>
+        </>
+      ) : (
+        <DiagramToolGroup
+          title="플로우차트"
+          isOpen
+          onToggle={() => toggleGroup('FLOWCHART')}
+        >
+          <div className="tool-section">
+            <h4>도형</h4>
+            {flowchartDiagramConfig.tools.nodes.map((tool) => (
+              <button
+                key={tool.type}
+                type="button"
+                className="relation-tool"
+                onClick={() => onAddFlowchartNode(tool.type)}
+              >
+                {tool.label}
+              </button>
+            ))}
+          </div>
+          <div className="tool-section">
+            <h4>연결선 종류</h4>
+            {flowchartDiagramConfig.tools.relations.map((tool) => (
+              <button
+                key={tool.type}
+                type="button"
+                className={`relation-tool ${
+                  relationType === tool.type ? 'active' : ''
+                }`}
+                onClick={() => onSelectRelationType(tool.type)}
+              >
+                {tool.label}
+              </button>
+            ))}
+            <button
+              type="button"
+              className="sidebar-action-button"
+              style={{ marginTop: '8px' }}
+              onClick={onApplyRelationToSelected}
+              disabled={!hasSelectedEdge}
+            >
+              선택한 연결선 종류 변경
+            </button>
+          </div>
+        </DiagramToolGroup>
+      )}
 
       {/* 공통 편집 */}
       <div className="tool-section sidebar-edit-section" style={{ marginTop: '16px' }}>
