@@ -6,6 +6,7 @@ import type {
 } from '../../types/diagram';
 
 import ClassEditForm from '../../diagrams/class/ClassEditForm.tsx';
+import FlowchartEditForm from '../../diagrams/flowchart/FlowchartEditForm';
 
 import './NodeEditModal.css';
 
@@ -51,12 +52,14 @@ function NodeEditModal({
                     />
                 );
 
-            // 추후 추가할 노드 종류
-            // case 'flowchartNode':
-            //   return <FlowchartEditForm ... />;
-
-            // case 'useCaseNode':
-            //   return <UseCaseEditForm ... />;
+            case 'flowchartNode':
+                return (
+                    <FlowchartEditForm
+                        node={node}
+                        onSave={onSave}
+                        onCancel={onClose}
+                    />
+                );
 
             default:
                 return (
