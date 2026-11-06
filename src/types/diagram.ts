@@ -27,7 +27,8 @@ export type { UseCaseRelationType } from '../diagrams/USE_CASE/types';
 
 export type DiagramType =
     | 'CLASS'
-    | 'FLOWCHART';
+    | 'FLOWCHART'
+    | 'USE_CASE';
 
 export type DiagramNode =
     | ClassDiagramNode
