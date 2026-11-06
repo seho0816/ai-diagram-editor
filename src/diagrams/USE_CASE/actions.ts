@@ -1,13 +1,74 @@
 import type { DiagramModule } from '../diagramModule';
 import { classDiagramActions } from '../class/actions';
 
-// 기존 App.tsx에는 USE_CASE 초기화·노드 생성·관계선 생성 구현이 없었음.
-// 이번 단계에서는 기존 fallback을 유지하며 새로운 유스케이스 기능을 추가하지 않음.
-// 팀원은 이 파일을 확장하면서 공통 App.tsx를 수정하지 않도록 한다.
 export const useCaseDiagramActions: DiagramModule = {
-  initialNodes: classDiagramActions.initialNodes,
-  initialEdges: classDiagramActions.initialEdges,
+  initialNodes: [],
+  initialEdges: [],
   defaultRelationType: 'association',
-  createNode: () => null,
+
+  createNode: ((...args: any[]) => {
+    const toolType = args[0] as string;
+    const position = (typeof args[1] === 'object' && 'x' in args[1] ? args[1] : args[2]) || { x: 100, y: 100 };
+    const id = `${toolType}_${Date.now()}`;
+
+    switch (toolType) {
+      case 'actor':
+      case 'actorNode':
+        return {
+          id,
+          type: 'actorNode',
+          position,
+          data: { label: '새 액터' },
+        };
+      case 'usecase':
+      case 'useCaseNode':
+        return {
+          id,
+          type: 'useCaseNode',
+          position,
+          data: { label: '새 유스케이스' },
+        };
+      case 'boundary':
+      case 'boundaryNode':
+        return {
+          id,
+          type: 'boundaryNode',
+          position,
+          data: { label: '시스템 경계' },
+        };
+      // =====================================================================
+      // 아래부터 신규 추가된 노드 타입 생성 분기 2026-11-07 01:20분추가
+      // =====================================================================
+      case 'subsystem':
+        return {
+          id,
+          type: 'subsystem',
+          position,
+          data: { label: '서브시스템' },
+        };
+      case 'externalSystem':
+        return {
+          id,
+          type: 'externalSystem',
+          position,
+          data: { label: '외부 시스템' },
+        };
+      case 'note':
+        return {
+          id,
+          type: 'note',
+          position,
+          data: { label: '노트 주석' },
+        };
+      default:
+        return {
+          id,
+          type: 'useCaseNode',
+          position,
+          data: { label: '새 노드' },
+        };
+    }
+  }) as any,
+
   createEdge: classDiagramActions.createEdge,
 };
