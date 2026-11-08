@@ -26,6 +26,7 @@ type Props = {
   onConnect: OnConnect;
   onNodeDoubleClick: NodeMouseHandler<DiagramNode>;
   enableDelete: boolean;
+  readOnly?: boolean;
   onEdgeDoubleClick: EdgeMouseHandler<DiagramEdge>;
 };
 
@@ -38,6 +39,7 @@ function DiagramCanvas({
   onNodeDoubleClick,
   onEdgeDoubleClick,
   enableDelete,
+  readOnly = false,
 }: Props) {
   return (
     <main className="diagram-canvas">
@@ -46,14 +48,17 @@ function DiagramCanvas({
         edges={edges}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onNodeDoubleClick={onNodeDoubleClick}
-        onEdgeDoubleClick={onEdgeDoubleClick}
+        onNodesChange={readOnly ? () => {} : onNodesChange}
+        onEdgesChange={readOnly ? () => {} : onEdgesChange}
+        onConnect={readOnly ? () => {} : onConnect}
+        onNodeDoubleClick={readOnly ? undefined : onNodeDoubleClick}
+        onEdgeDoubleClick={readOnly ? undefined : onEdgeDoubleClick}
         connectionMode={ConnectionMode.Loose}
         connectionLineType={ConnectionLineType.SmoothStep}
-        deleteKeyCode={enableDelete ? ['Delete', 'Backspace'] : null}
+        nodesDraggable={!readOnly}
+        nodesConnectable={!readOnly}
+        elementsSelectable={!readOnly}
+        deleteKeyCode={!readOnly && enableDelete ? ['Delete', 'Backspace'] : null}
         edgesReconnectable={false}
         fitView
       >
