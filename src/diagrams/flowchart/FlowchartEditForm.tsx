@@ -1,5 +1,6 @@
 import { useState, type SubmitEvent } from 'react';
 import type { FlowchartDiagramNode } from './types';
+import { flowchartDiagramConfig } from './config';
 
 type Props = {
     node: FlowchartDiagramNode;
@@ -21,18 +22,15 @@ function FlowchartEditForm({ node, onSave, onCancel }: Props) {
         });
     };
 
-    const shapeLabels = {
-        startEnd: '시작 / 종료',
-        process: '처리',
-        decision: '조건',
-        inputOutput: '입력 / 출력',
-    } as const;
+    const shapeLabel = flowchartDiagramConfig.tools.nodes.find(
+        (tool) => tool.type === node.data.shape
+    )?.label ?? node.data.shape;
 
     return (
         <form className="node-edit-form" onSubmit={handleSubmit}>
             <div className="node-edit-field">
                 <label htmlFor="flowchart-shape">노드 종류</label>
-                <input id="flowchart-shape" value={shapeLabels[node.data.shape]} readOnly />
+                <input id="flowchart-shape" value={shapeLabel} readOnly />
             </div>
             <div className="node-edit-field">
                 <label htmlFor="flowchart-label">표시 내용</label>
