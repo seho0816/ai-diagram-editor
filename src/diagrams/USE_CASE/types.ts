@@ -34,3 +34,14 @@ export type UseCaseEdgeData = {
 };
 
 export type UseCaseDiagramEdge = Edge<UseCaseEdgeData, 'umlEdge'>;
+
+// =====================================================================
+      // 아래부터 신규 추가된 노드 타입 생성 분기 2026-11-07 01:20분추가
+// =====================================================================
+export type SubsystemNodeData = { label: string };
+export type ExternalSystemNodeData = { label: string };
+export type NoteNodeData = { label: string };
+
+export type SubsystemNode = Node<SubsystemNodeData, 'subsystem'>;
+export type ExternalSystemNode = Node<ExternalSystemNodeData, 'externalSystem'>;
+export type NoteNode = Node<NoteNodeData, 'note'>;

@@ -31,3 +31,21 @@ export const useCaseDiagramConfig = {
     ],
   },
 } as const;
+
+// =====================================================================
+      // 아래부터 신규 추가된 노드 타입 생성 분기 2026-11-07 01:20분추가 
+// =====================================================================
+import { SubsystemNode } from './SubsystemNode';
+import { ExternalSystemNode } from './ExternalSystemNode';
+import { NoteNode } from './NoteNode';
+
+// 기존 config 객체에 새 노드 타입 및 툴바 항목 확장 주입
+(useCaseDiagramConfig.nodeTypes as any).subsystem = SubsystemNode;
+(useCaseDiagramConfig.nodeTypes as any).externalSystem = ExternalSystemNode;
+(useCaseDiagramConfig.nodeTypes as any).note = NoteNode;
+
+(useCaseDiagramConfig.tools.nodes as any).push(
+  { type: 'subsystem', label: '서브시스템' },
+  { type: 'externalSystem', label: '외부 시스템' },
+  { type: 'note', label: '노트 주석' }
+);
