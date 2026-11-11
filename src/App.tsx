@@ -71,11 +71,17 @@ function App() {
   );
 
   // 사이드바는 다이어그램 종류와 도구 이름만 전달한다.
-  // USE_CASE 생성 함수는 기존 코드에서 미구현이므로 이 단계에서는 새로 구현하지 않는다.
-  const addNode = (type: DiagramType, toolType: string) => {
+  // position은 드래그 앤 드롭으로 만들 때만 전달되며, 클릭 추가는 기존 방식 그대로다.
+  const addNode = (
+    type: DiagramType,
+    toolType: string,
+    position?: { x: number; y: number }
+  ) => {
     setNodes((current) => {
       const newNode = diagramRegistry[type].createNode(toolType, current);
-      return newNode ? [...current, newNode] : current;
+      if (!newNode) return current;
+      // 드롭으로 만든 경우에만 놓은 위치로 덮어쓴다
+      return [...current, position ? { ...newNode, position } : newNode];
     });
   };
 
@@ -238,6 +244,9 @@ function App() {
           onNodeDoubleClick={handleNodeDoubleClick}
           enableDelete={editingNodeId === null && editingEdgeId === null}
           onEdgeDoubleClick={handleEdgeDoubleClick}
+          onDropNode={(toolType, position) =>
+            addNode(diagramType, toolType, position)
+          }
         />
       </div>
 

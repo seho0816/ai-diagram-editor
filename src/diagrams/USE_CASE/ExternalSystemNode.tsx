@@ -1,11 +1,61 @@
-import { Handle, Position } from '@xyflow/react';
+import { Handle, NodeResizer, Position, type NodeProps } from '@xyflow/react';
 
-export function NoteNode({ data }: { data: { label: string } }) {
+const handles = [
+  { id: 'top', position: Position.Top },
+  { id: 'right', position: Position.Right },
+  { id: 'bottom', position: Position.Bottom },
+  { id: 'left', position: Position.Left },
+];
+
+export function ExternalSystemNode({ data, selected }: NodeProps) {
+  const label = (data as { label?: string }).label;
+
   return (
-    <div style={{ padding: 8, border: '1px dashed #666', background: '#fffdf0', minWidth: 80, fontSize: '12px' }}>
-      <Handle type="target" position={Position.Top} />
-      <div>{data.label || 'Note'}</div>
-      <Handle type="source" position={Position.Bottom} />
-    </div>
+    <>
+      <NodeResizer
+        isVisible={selected}
+        minWidth={110}
+        minHeight={40}
+        lineStyle={{ borderColor: '#2563eb' }}
+        handleStyle={{ width: 8, height: 8, borderRadius: 2 }}
+      />
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          minWidth: 110,
+          minHeight: 40,
+          padding: '10px 16px',
+          boxSizing: 'border-box',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#ffffff',
+          border: selected ? '2.5px solid #2563eb' : '2px solid #1e293b',
+          borderRadius: '8px',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+          textAlign: 'center',
+          fontSize: '12px',
+          fontWeight: 700,
+          color: '#1e293b',
+        }}
+      >
+        {handles.map((h) => (
+          <Handle
+            key={h.id}
+            id={h.id}
+            type="source"
+            position={h.position}
+            style={{
+              opacity: selected ? 1 : 0,
+              transition: 'opacity 0.15s',
+            }}
+          />
+        ))}
+        <div>{label || '외부 시스템'}</div>
+      </div>
+    </>
   );
 }
+
+export default ExternalSystemNode;

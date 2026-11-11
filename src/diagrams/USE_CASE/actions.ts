@@ -1,4 +1,5 @@
 import type { DiagramModule } from '../diagramModule';
+import type { DiagramNode } from '../../types/diagram';
 import { classDiagramActions } from '../class/actions';
 
 export const useCaseDiagramActions: DiagramModule = {
@@ -6,10 +7,13 @@ export const useCaseDiagramActions: DiagramModule = {
   initialEdges: [],
   defaultRelationType: 'association',
 
-  createNode: ((...args: any[]) => {
-    const toolType = args[0] as string;
-    const position = (typeof args[1] === 'object' && 'x' in args[1] ? args[1] : args[2]) || { x: 100, y: 100 };
+  // App.tsx가 createNode(toolType, currentNodes)로 호출한다.
+  createNode: ((toolType: string, currentNodes: DiagramNode[] = []) => {
     const id = `${toolType}_${Date.now()}`;
+
+    // 노드 개수에 따라 조금씩 어긋나게 배치해서 겹치지 않게 한다.
+    const offset = currentNodes.length % 6;
+    const position = { x: 120 + offset * 40, y: 100 + offset * 40 };
 
     switch (toolType) {
       case 'actor':
@@ -18,6 +22,7 @@ export const useCaseDiagramActions: DiagramModule = {
           id,
           type: 'actorNode',
           position,
+          style: { width: 90, height: 100 },
           data: { label: '새 액터' },
         };
       case 'usecase':
@@ -26,6 +31,7 @@ export const useCaseDiagramActions: DiagramModule = {
           id,
           type: 'useCaseNode',
           position,
+          style: { width: 150, height: 75 },
           data: { label: '새 유스케이스' },
         };
       case 'boundary':
@@ -34,16 +40,16 @@ export const useCaseDiagramActions: DiagramModule = {
           id,
           type: 'boundaryNode',
           position,
-          data: { label: '시스템 경계' },
+          zIndex: -1, // 다른 노드 뒤로 보내기
+          style: { width: 300, height: 400 },
+          data: { title: '시스템 경계' },
         };
-      // =====================================================================
-      // 아래부터 신규 추가된 노드 타입 생성 분기 2026-11-07 01:20분추가
-      // =====================================================================
       case 'subsystem':
         return {
           id,
           type: 'subsystem',
           position,
+          style: { width: 260, height: 180 },
           data: { label: '서브시스템' },
         };
       case 'externalSystem':
@@ -51,6 +57,7 @@ export const useCaseDiagramActions: DiagramModule = {
           id,
           type: 'externalSystem',
           position,
+          style: { width: 130, height: 50 },
           data: { label: '외부 시스템' },
         };
       case 'note':
@@ -58,6 +65,7 @@ export const useCaseDiagramActions: DiagramModule = {
           id,
           type: 'note',
           position,
+          style: { width: 130, height: 50 },
           data: { label: '노트 주석' },
         };
       default:
@@ -65,6 +73,7 @@ export const useCaseDiagramActions: DiagramModule = {
           id,
           type: 'useCaseNode',
           position,
+          style: { width: 150, height: 75 },
           data: { label: '새 노드' },
         };
     }

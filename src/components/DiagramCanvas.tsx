@@ -1,9 +1,12 @@
+import type { DragEvent } from 'react';
 import {
   ReactFlow,
+  ReactFlowProvider,
   Background,
   Controls,
   ConnectionLineType,
   ConnectionMode,
+  useReactFlow,
   type OnNodesChange,
   type OnEdgesChange,
   type OnConnect,
@@ -27,9 +30,11 @@ type Props = {
   onNodeDoubleClick: NodeMouseHandler<DiagramNode>;
   enableDelete: boolean;
   onEdgeDoubleClick: EdgeMouseHandler<DiagramEdge>;
+  // 팔레트에서 드래그해 캔버스에 놓았을 때 호출된다.
+  onDropNode: (toolType: string, position: { x: number; y: number }) => void;
 };
 
-function DiagramCanvas({
+function DiagramCanvasInner({
   nodes,
   edges,
   onNodesChange,
@@ -38,7 +43,27 @@ function DiagramCanvas({
   onNodeDoubleClick,
   onEdgeDoubleClick,
   enableDelete,
+  onDropNode,
 }: Props) {
+  const { screenToFlowPosition } = useReactFlow();
+
+  const handleDragOver = (event: DragEvent) => {
+    event.preventDefault(); // 이게 없으면 drop 이벤트가 발생하지 않는다
+    event.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (event: DragEvent) => {
+    event.preventDefault();
+    const toolType = event.dataTransfer.getData('application/reactflow');
+    if (!toolType) return; // 팔레트에서 온 드래그가 아니면 무시
+
+    const position = screenToFlowPosition({
+      x: event.clientX,
+      y: event.clientY,
+    });
+    onDropNode(toolType, position);
+  };
+
   return (
     <main className="diagram-canvas">
       <ReactFlow<DiagramNode, DiagramEdge>
@@ -51,6 +76,8 @@ function DiagramCanvas({
         onConnect={onConnect}
         onNodeDoubleClick={onNodeDoubleClick}
         onEdgeDoubleClick={onEdgeDoubleClick}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
         connectionMode={ConnectionMode.Loose}
         connectionLineType={ConnectionLineType.SmoothStep}
         deleteKeyCode={enableDelete ? ['Delete', 'Backspace'] : null}
@@ -61,6 +88,14 @@ function DiagramCanvas({
         <Controls />
       </ReactFlow>
     </main>
+  );
+}
+
+function DiagramCanvas(props: Props) {
+  return (
+    <ReactFlowProvider>
+      <DiagramCanvasInner {...props} />
+    </ReactFlowProvider>
   );
 }
 
