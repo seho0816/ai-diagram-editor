@@ -1,9 +1,13 @@
 import type { ReactNode } from 'react';
-import type { UseCaseRelationType } from '../../types/diagram';
+import type { UseCaseRelationType, DiagramNode, DiagramEdge } from '../../types/diagram'; // 2026-11-12 수정: DiagramNode, DiagramEdge 추가
 import type { RelationToolProps } from '../toolPanelTypes';
+import { useCaseTemplates } from './templates'; // 2026-11-12 추가
 
 type Props = RelationToolProps & {
   onAddNode: (toolType: string) => void;
+  // 2026-11-12 추가: 템플릿 불러오기 (유스케이스 모드일 때만 활성화)
+  onLoadTemplate?: (nodes: DiagramNode[], edges: DiagramEdge[]) => void;
+  canLoadTemplate?: boolean;
 };
 
 const useCaseRelations: { type: UseCaseRelationType; label: string }[] = [
@@ -86,6 +90,8 @@ function UseCaseToolPanel({
   onSelectRelationType,
   onApplyRelationToSelected,
   hasSelectedEdge,
+  onLoadTemplate, // 2026-11-12 추가
+  canLoadTemplate = false, // 2026-11-12 추가
 }: Props) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', margin: '-8px 0 0 0' }}>
@@ -134,6 +140,30 @@ function UseCaseToolPanel({
           </div>
         </div>
       </div>
+
+      {/* 2026-11-12 추가: 사례 템플릿 */}
+      {onLoadTemplate && (
+        <div className="tool-section" style={{ marginTop: '4px' }}>
+          <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#475569' }}>사례 템플릿</h4>
+          {useCaseTemplates.map((template) => (
+            <button
+              key={template.id}
+              type="button"
+              className="sidebar-action-button"
+              style={{ marginBottom: '6px' }}
+              disabled={!canLoadTemplate}
+              title={canLoadTemplate ? '현재 캔버스를 이 사례로 바꿉니다' : '상단에서 유스케이스를 선택하세요'}
+              onClick={() => {
+                if (window.confirm('현재 캔버스 내용이 사라집니다. 불러올까요?')) {
+                  onLoadTemplate(template.nodes, template.edges);
+                }
+              }}
+            >
+              {template.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* 관계선 (Relations) */}
       <div className="tool-section" style={{ marginTop: '4px' }}>
