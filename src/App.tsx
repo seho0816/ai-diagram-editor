@@ -92,6 +92,22 @@ function App() {
         });
     };
 
+    // ===== 2026-11-12 추가 (유스케이스 템플릿용, 이규찬) =====
+    const loadTemplate = (templateNodes: DiagramNode[], templateEdges: DiagramEdge[]) => {
+        setEditingNodeId(null);
+        setEditingEdgeId(null);
+        analysisRequestId.current += 1;
+        setAiLoading(false);
+        setAiResult(null);
+        setAiError(null);
+        setAnalysisSnapshot(null);
+        setShowEditPreview(false);
+        aiEdits.cancel();
+        setNodes(structuredClone(templateNodes));
+        setEdges(structuredClone(templateEdges));
+    };
+    // ===== 2026-11-12 추가 끝 =====
+
     const handleNodeDoubleClick: NodeMouseHandler<DiagramNode> = (
         _event,
         node
@@ -357,6 +373,7 @@ function App() {
                         onDeleteSelected={deleteSelected}
                         hasSelectedEdge={hasSelectedEdge}
                         hasSelection={hasSelection}
+                        onLoadTemplate={loadTemplate} // ===== 2026-11-12 추가 (템플릿) =====
                     />
                     <DiagramCanvas
                         nodes={nodes}
