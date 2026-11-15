@@ -1,8 +1,12 @@
-
+import { useRef } from 'react';
 import type { DiagramType } from '../types/diagram';
 
 type Props = {
     onReset: () => void;
+    onSave: () => void;
+    onLoad: () => void;
+    onExportJson: () => void;
+    onImportJson: (file: File) => void;
     onAnalyze: () => void;
     analyzing: boolean;
     diagramType: DiagramType;
@@ -11,11 +15,17 @@ type Props = {
 
 function TopToolbar({
                         onReset,
+                        onSave,
+                        onLoad,
+                        onExportJson,
+                        onImportJson,
                         onAnalyze,
                         analyzing,
                         diagramType,
                         onDiagramTypeChange,
                     }: Props) {
+    const importInputRef = useRef<HTMLInputElement>(null);
+
     return (
         <header className="top-toolbar">
             <div className="toolbar-left">
@@ -31,7 +41,22 @@ function TopToolbar({
             </div>
 
             <div className="toolbar-right">
-                <button disabled>저장</button>
+                <button type="button" onClick={onSave}>저장</button>
+                <button type="button" onClick={onLoad}>불러오기</button>
+                <button type="button" onClick={onExportJson}>JSON 내보내기</button>
+                <button type="button" onClick={() => importInputRef.current?.click()}>JSON 가져오기</button>
+                <input
+                    ref={importInputRef}
+                    type="file"
+                    accept=".json,application/json"
+                    aria-label="다이어그램 JSON 파일 선택"
+                    style={{ display: 'none' }}
+                    onChange={(event) => {
+                        const file = event.target.files?.[0];
+                        event.target.value = '';
+                        if (file) onImportJson(file);
+                    }}
+                />
                 <button
                     type="button"
                     onClick={onAnalyze}
