@@ -25,6 +25,8 @@ import DiagramCanvas from './components/DiagramCanvas';
 import NodeEditModal from './components/editor/NodeEditModal';
 
 import './App.css';
+import { FlowchartFeatureProvider } from './diagrams/flowchart/FlowchartFeatures';
+import FlowchartSimulationPanel from './diagrams/flowchart/FlowchartSimulationPanel';
 
 type AnalysisSnapshot = {
     nodes: DiagramNode[];
@@ -347,6 +349,14 @@ function App() {
                     </div>
                 </section>
             ) : (
+                <FlowchartFeatureProvider
+                    nodes={nodes}
+                    edges={edges}
+                    onArrange={(arrangedNodes, arrangedEdges) => {
+                        setNodes(arrangedNodes);
+                        setEdges(arrangedEdges);
+                    }}
+                >
                 <div className="editor-layout">
                     <ShapeSidebar
                         diagramType={diagramType}
@@ -358,6 +368,7 @@ function App() {
                         hasSelectedEdge={hasSelectedEdge}
                         hasSelection={hasSelection}
                     />
+                    <div className="flowchart-canvas-host">
                     <DiagramCanvas
                         nodes={nodes}
                         edges={edges}
@@ -371,7 +382,10 @@ function App() {
                             addNode(diagramType, toolType, position)
                         }
                     />
+                    {diagramType === 'FLOWCHART' && <FlowchartSimulationPanel />}
+                    </div>
                 </div>
+                </FlowchartFeatureProvider>
             )}
 
             {editingNode && (

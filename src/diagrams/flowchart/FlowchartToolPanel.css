@@ -10,3 +10,16 @@
 .flowchart-tool-preview { display: block; width: min(76px, 100%); height: 48px; }
 .flowchart-relation-preview { display: block; width: min(130px, 100%); height: 36px; }
 .flowchart-relation-section > .sidebar-action-button { width: calc(100% - 18px); margin: 0 9px 10px; }
+
+.flowchart-feature-controls { padding: 10px; display: grid; gap: 8px; }
+.flowchart-direction-controls, .flowchart-branch-buttons { display: flex; gap: 5px; }
+.flowchart-direction-controls button, .flowchart-simulation-buttons button, .flowchart-branch-buttons button { border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; cursor: pointer; font-size: 11px; padding: 8px 4px; flex: 1; }
+.flowchart-direction-controls button.active { background: #dbeafe; color: #1d4ed8; border-color: #93c5fd; }
+.flowchart-primary-action { width: 100%; border: 0; border-radius: 6px; padding: 10px; background: #2563eb; color: #fff; cursor: pointer; font-weight: 600; }
+.flowchart-simulation-buttons { display: flex; gap: 4px; }
+.flowchart-simulation-buttons button:disabled { opacity: .45; cursor: not-allowed; }
+.flowchart-current-step { background: #eff6ff; border-radius: 6px; padding: 8px; font-size: 12px; }
+.flowchart-branch-buttons button:first-child { color: #15803d; background: #f0fdf4; }
+.flowchart-branch-buttons button:last-child { color: #dc2626; background: #fef2f2; }
+.flowchart-feature-error { color: #b91c1c; font-size: 11px; margin: 0; }
+.flowchart-feature-finished { color: #15803d; font-size: 11px; margin: 0; }

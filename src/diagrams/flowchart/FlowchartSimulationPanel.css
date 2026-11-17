@@ -1,0 +1,18 @@
+.flowchart-canvas-host { position: relative; flex: 1; min-width: 0; height: 100%; }
+.flowchart-canvas-host > .diagram-canvas { height: 100%; width: 100%; }
+.flowchart-simulation-overlay { position: absolute; right: 18px; bottom: 18px; z-index: 8; width: min(310px, calc(100% - 36px)); max-height: min(440px, 75%); overflow: auto; border: 1px solid #bfdbfe; border-radius: 12px; background: white; color: #1e293b; box-shadow: 0 8px 26px #0f172a25; font-size: 12px; }
+.flowchart-simulation-overlay header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: #2563eb; color: white; }
+.flowchart-simulation-overlay header button { background: transparent; border: none; cursor: pointer; color: white; font-size: 16px; }
+.flowchart-simulation-history { padding: 12px; max-height: 185px; overflow-y: auto; }
+.flowchart-simulation-history div { padding: 7px; display: flex; align-items: center; gap: 8px; border-radius: 6px; }
+.flowchart-simulation-history div.current { background: #dbeafe; color: #1d4ed8; font-weight: 700; }
+.flowchart-simulation-history span { background: #e2e8f0; border-radius: 100%; width: 22px; height: 22px; display: grid; place-items: center; }
+.flowchart-simulation-overlay p { margin: 5px 12px 10px; }
+.flowchart-simulation-overlay .sim-error { color: #b91c1c; }
+.flowchart-simulation-overlay .sim-success { color: #15803d; }
+.sim-branch-row, .sim-navigation { display: flex; gap: 8px; padding: 7px 12px 12px; }
+.sim-branch-row button, .sim-navigation button { flex: 1; border: 1px solid #cbd5e1; border-radius: 6px; padding: 9px 7px; background: #f8fafc; cursor: pointer; }
+.sim-branch-row .sim-yes { color: #15803d; background: #f0fdf4; border-color: #86efac; }
+.sim-branch-row .sim-no { color: #b91c1c; background: #fef2f2; border-color: #fca5a5; }
+.sim-navigation button:last-child { background: #2563eb; color: white; border-color: #2563eb; }
+.sim-navigation button:disabled, .sim-branch-row button:disabled { opacity: .45; cursor: not-allowed; }

@@ -3,6 +3,7 @@ import { flowchartDiagramConfig } from './config';
 import type { FlowchartShape, FlowchartRelationType } from './types';
 import type { RelationToolProps } from '../toolPanelTypes';
 import './FlowchartToolPanel.css';
+import { useFlowchartFeatures } from './FlowchartFeatures';
 
 type Props = RelationToolProps & {
   onAddNode: (toolType: string) => void;
@@ -43,7 +44,8 @@ function RelationPreview({ relation }: { relation: FlowchartRelationType }) {
 }
 
 function FlowchartToolPanel({ onAddNode, relationType, onSelectRelationType, onApplyRelationToSelected, hasSelectedEdge }: Props) {
-  const [opened, setOpened] = useState({ basic: true, extended: true, relations: true });
+  const [opened, setOpened] = useState({ basic: true, extended: true, relations: true, layout: true, simulation: true });
+  const features = useFlowchartFeatures();
   const toggle = (key: keyof typeof opened) => setOpened((old) => ({ ...old, [key]: !old[key] }));
   return (
     <div className="flowchart-tool-panel">
@@ -76,6 +78,40 @@ function FlowchartToolPanel({ onAddNode, relationType, onSelectRelationType, onA
           <button type="button" className="sidebar-action-button" onClick={onApplyRelationToSelected} disabled={!hasSelectedEdge}>선택한 연결선 종류 변경</button>
         </div>}
       </section>
+      {features && <>
+        <section className="flowchart-tool-section">
+          <button type="button" className="flowchart-group-heading" aria-expanded={opened.layout} onClick={() => toggle('layout')}>
+            <span>자동 정렬</span><span aria-hidden="true">{opened.layout ? '⌃' : '⌄'}</span>
+          </button>
+          {opened.layout && <div className="flowchart-feature-controls">
+            <div className="flowchart-direction-controls" role="group" aria-label="자동 정렬 방향">
+              <button type="button" aria-pressed={features.direction === 'vertical'} className={features.direction === 'vertical' ? 'active' : ''} onClick={() => features.setDirection('vertical')}>세로 정렬</button>
+              <button type="button" aria-pressed={features.direction === 'horizontal'} className={features.direction === 'horizontal' ? 'active' : ''} onClick={() => features.setDirection('horizontal')}>가로 정렬</button>
+            </div>
+            <button type="button" className="flowchart-primary-action" onClick={features.arrange}>자동 정렬 실행</button>
+          </div>}
+        </section>
+        <section className="flowchart-tool-section">
+          <button type="button" className="flowchart-group-heading" aria-expanded={opened.simulation} onClick={() => toggle('simulation')}>
+            <span>실행 시뮬레이션</span><span aria-hidden="true">{opened.simulation ? '⌃' : '⌄'}</span>
+          </button>
+          {opened.simulation && <div className="flowchart-feature-controls">
+            <div className="flowchart-simulation-buttons">
+              <button type="button" onClick={features.start}>시작</button>
+              <button type="button" onClick={features.previous} disabled={features.history.length <= 1}>이전</button>
+              <button type="button" onClick={() => features.advance()} disabled={!features.running || features.finished || features.branches.length > 0}>다음</button>
+              <button type="button" onClick={features.stop} disabled={!features.running && !features.error}>종료</button>
+            </div>
+            <div className="flowchart-current-step">현재 단계: {features.activeNodeId ? features.nameOf(features.activeNodeId) : '미실행'}</div>
+            {features.branches.length > 0 && <div className="flowchart-branch-buttons">
+              {features.branches.includes('yes') && <button type="button" onClick={() => features.advance('yes')}>예</button>}
+              {features.branches.includes('no') && <button type="button" onClick={() => features.advance('no')}>아니오</button>}
+            </div>}
+            {features.error && <p role="alert" className="flowchart-feature-error">{features.error}</p>}
+            {features.finished && <p role="status" className="flowchart-feature-finished">시뮬레이션 종료</p>}
+          </div>}
+        </section>
+      </>}
     </div>
   );
 }

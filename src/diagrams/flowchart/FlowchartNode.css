@@ -156,3 +156,8 @@
 .flow-node-delay .flow-node-label, .flow-node-manualInput .flow-node-label,
 .flow-node-display .flow-node-label { z-index: 2; }
 .flow-node-document.selected::before, .flow-node-offPage.selected::before, .flow-node-manualInput.selected::before, .flow-node-display.selected::before { background: #1d4ed8; }
+
+/* 현재 실행 중인 노드 표시(노드 자체의 위치/연결선은 변경하지 않음) */
+.flow-node.flow-node-sim-active { filter: drop-shadow(0 0 7px rgba(37, 99, 235, .65)); outline: 3px solid #2563eb; outline-offset: 5px; }
+.flow-node-decision.flow-node-sim-active { outline: none; }
+.flow-node-decision.flow-node-sim-active::before { background: #2563eb; }

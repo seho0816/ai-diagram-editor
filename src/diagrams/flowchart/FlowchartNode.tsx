@@ -1,6 +1,7 @@
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { FlowchartDiagramNode } from './types';
 import './FlowchartNode.css';
+import { useFlowchartFeatures } from './FlowchartFeatures';
 
 const handles = [
     { id: 'top', position: Position.Top },
@@ -9,9 +10,11 @@ const handles = [
     { id: 'left', position: Position.Left },
 ];
 
-function FlowchartNode({ data, selected }: NodeProps<FlowchartDiagramNode>) {
+function FlowchartNode({ id, data, selected }: NodeProps<FlowchartDiagramNode>) {
+    const features = useFlowchartFeatures();
+    const active = features?.activeNodeId === id;
     return (
-        <div className={`flow-node flow-node-${data.shape}${selected ? ' selected' : ''}`}>
+        <div className={`flow-node flow-node-${data.shape}${selected ? ' selected' : ''}${active ? ' flow-node-sim-active' : ''}`}>
             {handles.map((handle) => (
                 <Handle
                     key={handle.id}
