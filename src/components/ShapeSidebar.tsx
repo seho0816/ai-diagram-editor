@@ -4,7 +4,7 @@ import ClassToolPanel from '../diagrams/class/ClassToolPanel';
 import UseCaseToolPanel from '../diagrams/USE_CASE/UseCaseToolPanel';
 import FlowchartToolPanel from '../diagrams/flowchart/FlowchartToolPanel';
 import type { DiagramRelationType } from '../diagrams/toolPanelTypes';
-import type { DiagramType } from '../types/diagram';
+import type { DiagramType, DiagramNode, DiagramEdge } from '../types/diagram'; // ===== 2026-11-12 추가 (DiagramNode, DiagramEdge) =====
 
 export interface ShapeSidebarProps {
   diagramType?: DiagramType;
@@ -15,6 +15,9 @@ export interface ShapeSidebarProps {
   onDeleteSelected: () => void;
   hasSelectedEdge: boolean;
   hasSelection: boolean;
+  // ===== 2026-11-12 추가 (템플릿) =====
+  onLoadTemplate?: (nodes: DiagramNode[], edges: DiagramEdge[]) => void;
+  // ===== 2026-11-12 추가 끝 =====
 }
 
 function ShapeSidebar({
@@ -26,6 +29,7 @@ function ShapeSidebar({
   onDeleteSelected,
   hasSelectedEdge,
   hasSelection,
+  onLoadTemplate, // ===== 2026-11-12 추가 (템플릿) =====
 }: ShapeSidebarProps) {
   const [expandedGroup, setExpandedGroup] = useState<string | null>(String(diagramType));
   const toggleGroup = (groupKey: string) => {
@@ -63,6 +67,10 @@ function ShapeSidebar({
               onSelectRelationType={onSelectRelationType}
               onApplyRelationToSelected={onApplyRelationToSelected}
               hasSelectedEdge={hasSelectedEdge}
+              // ===== 2026-11-12 추가 (템플릿) =====
+              onLoadTemplate={onLoadTemplate}
+              canLoadTemplate={diagramType === 'USE_CASE'}
+              // ===== 2026-11-12 추가 끝 =====
             />
           </DiagramToolGroup>
         </>

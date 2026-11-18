@@ -1,4 +1,3 @@
-
 import type { DiagramType } from '../types/diagram';
 
 type Props = {
@@ -25,6 +24,8 @@ function TopToolbar({
                     <div className="diagram-mode-options">
                         <button type="button" className={`diagram-mode-button ${diagramType === 'CLASS' ? 'selected' : ''}`} aria-pressed={diagramType === 'CLASS'} onClick={() => onDiagramTypeChange('CLASS')}>클래스</button>
                         <button type="button" className={`diagram-mode-button ${diagramType === 'FLOWCHART' ? 'selected' : ''}`} aria-pressed={diagramType === 'FLOWCHART'} onClick={() => onDiagramTypeChange('FLOWCHART')}>플로우차트</button>
+                        {/* 2026-11-12 추가: 유스케이스 전환 버튼 */}
+                        <button type="button" className={`diagram-mode-button ${diagramType === 'USE_CASE' ? 'selected' : ''}`} aria-pressed={diagramType === 'USE_CASE'} onClick={() => onDiagramTypeChange('USE_CASE')}>유스케이스</button>
                     </div>
                 </div>
                 <button onClick={onReset}>초기화</button>

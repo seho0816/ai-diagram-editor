@@ -1,6 +1,15 @@
+import type { Connection } from '@xyflow/react';                  // 2026-11-12 추가
 import type { DiagramModule } from '../diagramModule';
 import type { DiagramNode } from '../../types/diagram';
-import { classDiagramActions } from '../class/actions';
+import type { DiagramRelationType } from '../toolPanelTypes';     // 2026-11-12 추가
+// import { classDiagramActions } from '../class/actions';        // 2026-11-12 삭제 (이전 코드)
+
+// 2026-11-12 추가: 유스케이스 관계선 4종을 그대로 저장하는 전용 함수
+const useCaseRelationTypes = ['association', 'include', 'extend', 'generalization'];
+
+function normalizeUseCaseRelation(type: DiagramRelationType): string {
+  return useCaseRelationTypes.includes(type) ? type : 'association';
+}
 
 export const useCaseDiagramActions: DiagramModule = {
   initialNodes: [],
@@ -79,5 +88,15 @@ export const useCaseDiagramActions: DiagramModule = {
     }
   }) as any,
 
-  createEdge: classDiagramActions.createEdge,
+  // 이전 코드 (2026-11-12 교체됨): createEdge: classDiagramActions.createEdge,
+  // 2026-11-12 수정: 클래스의 createEdge를 쓰면 include/extend가 association으로 바뀌어서 유스케이스 전용으로 분리
+  createEdge: ((connection: Connection, type: DiagramRelationType) => ({
+    id: crypto.randomUUID(),
+    source: connection.source,
+    sourceHandle: connection.sourceHandle,
+    target: connection.target,
+    targetHandle: connection.targetHandle,
+    type: 'umlEdge',
+    data: { relationType: normalizeUseCaseRelation(type) },
+  })) as any,
 };
