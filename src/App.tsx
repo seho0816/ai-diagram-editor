@@ -23,6 +23,14 @@ import TopToolbar from './components/TopToolbar';
 import ShapeSidebar from './components/ShapeSidebar';
 import DiagramCanvas from './components/DiagramCanvas';
 import NodeEditModal from './components/editor/NodeEditModal';
+import {
+    exportDiagramJson,
+    loadDiagramLocally,
+    MAX_DIAGRAM_FILE_SIZE,
+    parseDiagramDocument,
+    saveDiagramLocally,
+    type DiagramDocument,
+} from './persistence/diagramStorage';
 
 import './App.css';
 import { FlowchartFeatureProvider } from './diagrams/flowchart/FlowchartFeatures';
@@ -199,12 +207,92 @@ function App() {
     const [aiResult, setAiResult] = useState<AiAnalysisResult | null>(null);
     const [analysisSnapshot, setAnalysisSnapshot] = useState<AnalysisSnapshot | null>(null);
     const [showEditPreview, setShowEditPreview] = useState(false);
+    const [canvasInstance, setCanvasInstance] = useState(0);
 
     const aiEdits = useAiEditPreview({
         diagramType,
         purpose: diagramPurpose,
         nodes, edges, setNodes, setEdges,
     });
+
+    // Save only the actual editor graph; AI previews have not been approved yet.
+    const handleSaveDiagram = () => {
+        try {
+            saveDiagramLocally({
+                diagramType,
+                nodes,
+                edges,
+                purpose: diagramPurpose,
+            });
+            window.alert('현재 다이어그램을 저장했습니다.');
+        } catch (error) {
+            window.alert(error instanceof Error ? error.message : '저장에 실패했습니다.');
+        }
+    };
+
+    // Both local load and JSON import must restore the same editor state.
+    const restoreDiagram = (saved: DiagramDocument) => {
+        analysisRequestId.current += 1;
+        aiEdits.cancel();
+        setAiPanelOpen(false);
+        setAiLoading(false);
+        setAiError(null);
+        setAiResult(null);
+        setAnalysisSnapshot(null);
+        setShowEditPreview(false);
+        setEditingNodeId(null);
+        setEditingEdgeId(null);
+        setDiagramType(saved.diagramType);
+        setRelationType(diagramRegistry[saved.diagramType].defaultRelationType);
+        setNodes(structuredClone(saved.nodes));
+        setEdges(structuredClone(saved.edges));
+        setDiagramPurpose(saved.purpose);
+        setCanvasInstance((current) => current + 1);
+    };
+
+    const handleLoadDiagram = () => {
+        try {
+            const saved = loadDiagramLocally(diagramType);
+            if (!saved) {
+                window.alert('현재 다이어그램 종류에 저장된 내용이 없습니다.');
+                return;
+            }
+            if (!window.confirm('현재 작업을 저장된 다이어그램으로 교체할까요? 저장하지 않은 변경은 사라집니다.')) {
+                return;
+            }
+            restoreDiagram(saved);
+            window.alert('저장된 다이어그램을 불러왔습니다.');
+        } catch (error) {
+            window.alert(error instanceof Error ? error.message : '불러오기에 실패했습니다.');
+        }
+    };
+
+    const handleExportJson = () => {
+        try {
+            exportDiagramJson({ diagramType, nodes, edges, purpose: diagramPurpose });
+        } catch (error) {
+            window.alert(error instanceof Error ? error.message : 'JSON 내보내기에 실패했습니다.');
+        }
+    };
+
+    const handleImportJson = async (file: File) => {
+        try {
+            if (file.size > MAX_DIAGRAM_FILE_SIZE) {
+                throw new Error('5MB 이하의 JSON 파일만 가져올 수 있습니다.');
+            }
+            const saved = parseDiagramDocument(await file.text());
+            const switchWarning = saved.diagramType !== diagramType
+                ? '파일에 저장된 다이어그램 종류로 전환됩니다.\n'
+                : '';
+            if (!window.confirm(`${switchWarning}현재 작업을 JSON 파일의 내용으로 교체할까요? 저장하지 않은 변경은 사라집니다.`)) {
+                return;
+            }
+            restoreDiagram(saved);
+            window.alert('JSON 파일을 가져왔습니다. 브라우저에 따로 저장하려면 저장 버튼을 누르세요.');
+        } catch (error) {
+            window.alert(error instanceof Error ? error.message : 'JSON 가져오기에 실패했습니다.');
+        }
+    };
 
     const runAiAnalysis = async () => {
         if (aiLoading) return;
@@ -298,6 +386,10 @@ function App() {
                 onDiagramTypeChange={changeDiagramType}
                 onAnalyze={() => setAiPanelOpen(true)}
                 analyzing={aiLoading}
+                onSave={handleSaveDiagram}
+                onLoad={handleLoadDiagram}
+                onExportJson={handleExportJson}
+                onImportJson={(file) => { void handleImportJson(file); }}
             />
 
             {aiPanelOpen ? (
@@ -387,6 +479,7 @@ function App() {
                     />
                     <div className="flowchart-canvas-host">
                     <DiagramCanvas
+                        key={canvasInstance}
                         nodes={nodes}
                         edges={edges}
                         onNodesChange={onNodesChange}

@@ -12,8 +12,11 @@ const diagramInstructions = {
     USE_CASE: `당신은 UML 유스케이스 다이어그램을 분석하는 설계 리뷰어입니다.
 
 데이터 해석:
-- actorNode: 액터, useCaseNode: 유스케이스, boundaryNode: 시스템 경계입니다.
-- 관계선 data.relationType은 association, include, extend, generalization 등이 될 수 있습니다.
+- actorNode: 액터(data.label), useCaseNode: 유스케이스(data.label), boundaryNode: 시스템 경계(data.title)입니다.
+- subsystem: 서브시스템(data.label), externalSystem: 외부 시스템(data.label), note: 노트/주석(data.label)입니다.
+- 노트는 설명을 위한 요소이며, 다른 노드와 동일하게 기능이나 실행 단계로 간주하지 마세요.
+- 관계선의 source, target은 연결된 노드 ID이며, data.relationType은 association, include, extend, generalization 등이 될 수 있습니다.
+- 관계선 종류가 association으로 저장되어 있으면 실제로 include/extend/generalization이라고 단정하지 마세요.
 
 분석 기준:
 1. 설계 목적에 필요한 액터와 유스케이스가 표현되어 있는지
