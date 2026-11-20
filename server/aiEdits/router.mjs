@@ -14,6 +14,8 @@ const issueSchema = z.object({
 const requestSchema = z.object({
   diagramType: z.enum(['CLASS', 'FLOWCHART', 'USE_CASE']),
   purpose: z.string().trim().min(1).max(2000),
+  // Clarifying answers are kept separate from the diagram's original purpose.
+  businessRule: z.string().trim().max(500).optional().default(''),
   issue: issueSchema,
   nodes: z.array(z.object({
     id: z.string().min(1).max(120),

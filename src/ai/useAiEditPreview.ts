@@ -14,6 +14,12 @@ type Options = {
   setEdges: Dispatch<SetStateAction<DiagramEdge[]>>;
 };
 
+type ClarificationState = {
+  issueIndex: number;
+  question: string;
+  reviewed: boolean;
+};
+
 type PreviewState = {
   baseSignature: string;
   issueIndex: number;
@@ -42,6 +48,7 @@ export function useAiEditPreview({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<PreviewState | null>(null);
+  const [clarification, setClarification] = useState<ClarificationState | null>(null);
   const activePreview = preview?.baseSignature === signature ? preview : null;
 
   function cancel() {
@@ -49,19 +56,22 @@ export function useAiEditPreview({
     setLoading(false);
     setError(null);
     setPreview(null);
+    setClarification(null);
   }
 
-  async function propose(issue: AiIssue, issueIndex: number) {
+  async function propose(issue: AiIssue, issueIndex: number, businessRule = '') {
     const serial = ++requestSerial.current;
     const baseSignature = signatureRef.current;
     setLoading(true);
     setError(null);
     setPreview(null);
+    setClarification(null);
 
     try {
       const response = await requestAiEditProposal({
         diagramType,
         purpose,
+        businessRule: diagramType === 'USE_CASE' ? businessRule.trim() : '',
         issue,
         nodes: nodes.map(({ id, type, position, data }) => ({ id, type, position, data })),
         edges: edges.map(({ id, type, source, target, data }) => ({ id, type, source, target, data })),
@@ -71,9 +81,22 @@ export function useAiEditPreview({
         throw new Error('분석 후 다이어그램이 변경됐습니다. 다시 수정안을 생성해 주세요.');
       }
       if (response.operations.length === 0) {
-        throw new Error('이 항목은 안전하게 자동 수정할 수 없어 조언만 제공합니다.');
+        const explanation = response.description
+          .replace(/operations\s*=\s*\[\s*\]/gi, '')
+          .replace(/operations(?:를|은)?\s*빈\s*배열로\s*반환(?:합니다|했습니다)?\.?/gi, '')
+          .replace(/자동 수정 보류[:：]?/g, '')
+          .trim();
+        if (diagramType === 'USE_CASE') {
+          setClarification({
+            issueIndex,
+            question: explanation || '이 관계가 실제로 언제 필요하고, 어떤 조건에서 진행되는지 알려주세요.',
+            reviewed: Boolean(businessRule.trim()),
+          });
+          return;
+        }
+        throw new Error(explanation || '이 항목은 자동 수정할 내용을 찾지 못했습니다.');
       }
-      const draft = buildEditPreview(diagramType, nodes, edges, response.operations);
+      const draft = buildEditPreview(diagramType, nodes, edges, response.operations, purpose, businessRule);
       setPreview({
         baseSignature,
         issueIndex,
@@ -106,6 +129,7 @@ export function useAiEditPreview({
 
   return {
     preview: activePreview,
+    clarification,
     loading,
     error: preview && !activePreview
       ? '다이어그램이 변경되어 미리보기가 만료됐습니다. 다시 생성해 주세요.'

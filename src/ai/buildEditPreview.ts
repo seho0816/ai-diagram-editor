@@ -36,10 +36,12 @@ export function buildEditPreview(
   diagramType: DiagramType,
   originalNodes: DiagramNode[],
   originalEdges: DiagramEdge[],
-  operations: AiEditOperation[]
+  operations: AiEditOperation[],
+  purpose = '',
+  businessRule = ''
 ): PreviewGraph {
   if (diagramType === 'USE_CASE') {
-    return buildUseCaseEditPreview(originalNodes, originalEdges, operations);
+    return buildUseCaseEditPreview(originalNodes, originalEdges, operations, purpose, businessRule);
   }
   if (diagramType !== 'CLASS' && diagramType !== 'FLOWCHART') {
     throw new Error('이 다이어그램의 자동 수정은 아직 지원하지 않습니다.');

@@ -62,3 +62,10 @@ test('유스케이스의 추가 도형과 관계선 ID도 분석 데이터에 �
     assert.ok(prompt.includes('edge-1'));
     assert.match(prompt, /실제로 include\/extend\/generalization이라고 단정하지 마세요/);
 });
+
+test('유스케이스 관계가 모호할 때 추측하지 않고 확인하도록 안내한다', () => {
+    const prompt = buildAnalysisPrompt({ ...diagram, diagramType: 'USE_CASE' });
+    assert.match(prompt, /유스케이스끼리의 include\/extend를 단순 association으로 바꾸라는 권고는 하지 마세요/);
+    assert.match(prompt, /필수\/선택 여부를 추측하지 마세요/);
+    assert.match(prompt, /IMPROVEMENT/);
+});

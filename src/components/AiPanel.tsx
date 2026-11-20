@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { AiAnalysisResult, AiIssue } from '../types/ai';
 import './AiPanelEdits.css';
 
@@ -6,6 +7,12 @@ type EditPreviewSummary = {
   issueTitle: string;
   description: string;
   changes: string[];
+};
+
+type EditClarification = {
+  issueIndex: number;
+  question: string;
+  reviewed: boolean;
 };
 
 type Props = {
@@ -20,6 +27,8 @@ type Props = {
   editPreview: EditPreviewSummary | null;
   editLoading: boolean;
   editError: string | null;
+  editClarification: EditClarification | null;
+  onAnswerClarification: (issue: AiIssue, index: number, answer: string) => void;
   isPreviewVisible: boolean;
   onProposeEdit: (issue: AiIssue, index: number) => void;
   onShowPreview: (index: number) => void;
@@ -30,10 +39,11 @@ type Props = {
 
 function AiPanel({
   purpose, onPurposeChange, result, loading, error, onAnalyze, onClose,
-  editPreview, editLoading, editError,
+  editPreview, editLoading, editError, editClarification, onAnswerClarification,
   isPreviewVisible, onProposeEdit, onShowPreview, onShowOriginal,
   onApplyEdit, onCancelEdit,
 }: Props) {
+  const [answers, setAnswers] = useState<Record<string, string>>({});
   return (
     <aside className="ai-panel">
       <div className="ai-panel-header">
@@ -85,10 +95,20 @@ function AiPanel({
                   <button
                     type="button"
                     className="ai-edit-propose-button"
-                    onClick={() => onProposeEdit(issue, index)}
+                    onClick={() => {
+                      const answer = (answers[`${issue.targetId}::${issue.title}`] ?? '').trim();
+                      if (editClarification?.issueIndex === index && answer) {
+                        onAnswerClarification(issue, index, answer);
+                      } else {
+                        onProposeEdit(issue, index);
+                      }
+                    }}
                     disabled={loading || editLoading || Boolean(editPreview)}
                   >
-                    수정안 만들기
+                    {editClarification?.issueIndex === index &&
+                      (answers[`${issue.targetId}::${issue.title}`] ?? '').trim()
+                        ? '입력한 답변으로 수정안 만들기'
+                        : '수정안 만들기'}
                   </button>
                   <button
                     type="button"
@@ -99,6 +119,41 @@ function AiPanel({
                     {isPreviewVisible && editPreview?.issueIndex === index ? '원본 보기' : '미리보기'}
                   </button>
                 </div>
+                {editClarification?.issueIndex === index && !editPreview && (
+                  <section className="ai-edit-clarification" aria-label="AI 추가 질문">
+                    <h4>{editClarification.reviewed ? '입력한 내용으로 검토했어요' : '조금만 더 알려주세요'}</h4>
+                    <p>{editClarification.question}</p>
+                    <p className="ai-edit-clarification-help">
+                      {editClarification.reviewed
+                        ? '현재 정보로는 적용할 변경안을 만들지 않았어요. 기존 관계를 유지하거나 답변을 보충해 다시 검토할 수 있습니다.'
+                        : '짧게 답해도 돼요. 단, 관계선을 바꾸려면 실제 과정이 어떻게 진행되는지 확인이 필요할 수 있어요.'}
+                    </p>
+                    <form onSubmit={(event) => {
+                      event.preventDefault();
+                      const key = `${issue.targetId}::${issue.title}`;
+                      const answer = (answers[key] ?? '').trim();
+                      if (answer) onAnswerClarification(issue, index, answer);
+                    }}>
+                      <label htmlFor={`ai-edit-answer-${index}`}>실제 업무 규칙</label>
+                      <textarea
+                        id={`ai-edit-answer-${index}`}
+                        rows={3}
+                        maxLength={500}
+                        value={answers[`${issue.targetId}::${issue.title}`] ?? ''}
+                        onChange={(event) => {
+                          const key = `${issue.targetId}::${issue.title}`;
+                          setAnswers((current) => ({ ...current, [key]: event.target.value }));
+                        }}
+                        placeholder="예: 주문은 먼저 접수하고 결제는 식사 후 별도로 진행합니다."
+                        disabled={loading || editLoading}
+                      />
+                      <button type="submit" disabled={loading || editLoading ||
+                        !(answers[`${issue.targetId}::${issue.title}`] ?? '').trim()}>
+                        답변으로 수정안 다시 만들기
+                      </button>
+                    </form>
+                  </section>
+                )}
                 {editPreview?.issueIndex === index && (
                   <section className="ai-edit-preview" aria-label="AI 수정 미리보기">
                     <h4>{isPreviewVisible ? '수정 미리보기' : '수정안 준비 완료'}</h4>

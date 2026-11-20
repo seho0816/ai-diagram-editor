@@ -2,7 +2,7 @@ import type { DiagramType } from './diagram';
 import type { AiIssue } from './ai';
 
 /** Structured operations suggested by the model. Never apply without preview + approval. */
-export type AiEditKind = 'ADD_NODE' | 'UPDATE_NODE' | 'ADD_EDGE' | 'UPDATE_EDGE';
+export type AiEditKind = 'ADD_NODE' | 'UPDATE_NODE' | 'ADD_EDGE' | 'UPDATE_EDGE' | 'REMOVE_EDGE';
 
 export type AiEditOperation = {
   kind: AiEditKind;
@@ -17,6 +17,7 @@ export type AiEditOperation = {
   label: string;
   shape: string;
   relationType: string;
+  evidence?: string;
   sourceMultiplicity: string;
   targetMultiplicity: string;
 };
@@ -29,6 +30,8 @@ export type AiEditProposal = {
 export type AiEditRequest = {
   diagramType: DiagramType;
   purpose: string;
+  /** A rule entered by the user for this one suggestion, never automatically applied. */
+  businessRule?: string;
   issue: AiIssue;
   nodes: Array<{
     id: string;

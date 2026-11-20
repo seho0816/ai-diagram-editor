@@ -353,6 +353,13 @@ function App() {
         void aiEdits.propose(issue, index);
     };
 
+    const handleClarificationAnswer = (
+        issue: Parameters<typeof aiEdits.propose>[0], index: number, answer: string
+    ) => {
+        setShowEditPreview(false);
+        void aiEdits.propose(issue, index, answer);
+    };
+
     const handleApplyEdit = () => {
         const draft = aiEdits.preview;
         if (draft && aiEdits.apply()) {
@@ -415,6 +422,8 @@ function App() {
                         editPreview={aiEdits.preview}
                         editLoading={aiEdits.loading}
                         editError={aiEdits.error}
+                        editClarification={aiEdits.clarification}
+                        onAnswerClarification={handleClarificationAnswer}
                         isPreviewVisible={Boolean(visiblePreview)}
                         onProposeEdit={handleProposeEdit}
                         onShowPreview={(index) => {
