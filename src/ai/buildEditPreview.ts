@@ -1,5 +1,6 @@
 import type { DiagramEdge, DiagramNode, DiagramType } from '../types/diagram';
 import type { AiEditOperation } from '../types/aiEdits';
+import { buildUseCaseEditPreview } from './buildUseCaseEditPreview';
 
 const classRelations = new Set([
   'association', 'generalization', 'aggregation', 'composition', 'dependency',
@@ -37,6 +38,9 @@ export function buildEditPreview(
   originalEdges: DiagramEdge[],
   operations: AiEditOperation[]
 ): PreviewGraph {
+  if (diagramType === 'USE_CASE') {
+    return buildUseCaseEditPreview(originalNodes, originalEdges, operations);
+  }
   if (diagramType !== 'CLASS' && diagramType !== 'FLOWCHART') {
     throw new Error('이 다이어그램의 자동 수정은 아직 지원하지 않습니다.');
   }
@@ -50,7 +54,7 @@ export function buildEditPreview(
   const changes: string[] = [];
   const isClass = diagramType === 'CLASS';
   const nodeType = isClass ? 'classNode' : 'flowchartNode';
-  const edgeType = isClass ? 'umlEdge' : 'flowchartEdge';
+  const edgeType = isClass ? 'classUmlEdge' : 'flowchartEdge';
   const relations = isClass ? classRelations : flowRelations;
 
   const resolveNode = (id: string) => idAliases.get(id) ?? id;
@@ -127,7 +131,7 @@ export function buildEditPreview(
       if (isClass) {
         edges.push({
           id: crypto.randomUUID(),
-          type: 'umlEdge',
+          type: 'classUmlEdge',
           source: resolveNode(op.source), target: resolveNode(op.target),
           sourceHandle: 'right', targetHandle: 'left',
           data: {
@@ -151,7 +155,7 @@ export function buildEditPreview(
         throw new Error('AI가 존재하지 않는 관계선을 변경하려 했습니다.');
       }
       const edge = edges[index];
-      if (edge.type === 'umlEdge' && isClass) {
+      if (edge.type === 'classUmlEdge' && isClass) {
         edges[index] = {
           ...edge,
           data: {

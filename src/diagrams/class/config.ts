@@ -10,7 +10,7 @@ export const classDiagramConfig = {
     },
 
     edgeTypes: {
-        umlEdge: UmlEdge,
+        classUmlEdge: UmlEdge,
     },
 
     tools: {

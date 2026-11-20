@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import DiagramToolGroup from './DiagramToolGroup';
 import ClassToolPanel from '../diagrams/class/ClassToolPanel';
 import UseCaseToolPanel from '../diagrams/USE_CASE/UseCaseToolPanel';
@@ -32,6 +32,7 @@ function ShapeSidebar({
   onLoadTemplate, // ===== 2026-11-12 추가 (템플릿) =====
 }: ShapeSidebarProps) {
   const [expandedGroup, setExpandedGroup] = useState<string | null>(String(diagramType));
+  useEffect(() => { setExpandedGroup(String(diagramType)); }, [diagramType]);
   const toggleGroup = (groupKey: string) => {
     setExpandedGroup((current) => (current === groupKey ? null : groupKey));
   };
@@ -42,8 +43,7 @@ function ShapeSidebar({
         다이어그램 도구
       </h3>
 
-      {diagramType !== 'FLOWCHART' ? (
-        <>
+      {diagramType === 'CLASS' && (
           <DiagramToolGroup
             title="클래스"
             isOpen={expandedGroup === 'class' || expandedGroup === 'CLASS'}
@@ -55,7 +55,9 @@ function ShapeSidebar({
               onSelectRelationType={onSelectRelationType}
             />
           </DiagramToolGroup>
+      )}
 
+      {diagramType === 'USE_CASE' && (
           <DiagramToolGroup
             title="유스케이스"
             isOpen={expandedGroup === 'usecase' || expandedGroup === 'USE_CASE'}
@@ -73,8 +75,8 @@ function ShapeSidebar({
               // ===== 2026-11-12 추가 끝 =====
             />
           </DiagramToolGroup>
-        </>
-      ) : (
+      )}
+      {diagramType === 'FLOWCHART' && (
         <DiagramToolGroup
           title="플로우차트"
           isOpen

@@ -69,7 +69,7 @@ function App() {
         _event,
         edge
     ) => {
-        if (edge.type !== 'umlEdge') return;
+        if (edge.type !== 'classUmlEdge') return;
         setEditingNodeId(null);
         setEditingEdgeId(edge.id);
     };
@@ -141,7 +141,7 @@ function App() {
     const handleSaveEdge = (edgeId: string, updatedData: UmlEdgeData) => {
         setEdges((current) =>
             current.map((edge) =>
-                edge.id === edgeId && edge.type === 'umlEdge'
+                edge.id === edgeId && edge.type === 'classUmlEdge'
                     ? { ...edge, data: { ...edge.data, ...updatedData } }
                     : edge
             )
@@ -506,7 +506,7 @@ function App() {
                     onClose={closeEditModal}
                 />
             )}
-            {editingEdge && editingEdge.type === 'umlEdge' && (
+            {editingEdge && editingEdge.type === 'classUmlEdge' && (
                 <UmlEdgeEditModal
                     key={editingEdge.id}
                     edge={editingEdge}

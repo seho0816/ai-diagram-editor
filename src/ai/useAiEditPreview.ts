@@ -59,9 +59,6 @@ export function useAiEditPreview({
     setPreview(null);
 
     try {
-      if (diagramType === 'USE_CASE') {
-        throw new Error('유스케이스 자동 수정은 편집기 연결 후 지원할 예정입니다.');
-      }
       const response = await requestAiEditProposal({
         diagramType,
         purpose,

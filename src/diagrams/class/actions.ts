@@ -39,7 +39,7 @@ const initialEdges: DiagramEdge[] = [
     sourceHandle: 'right',
     target: 'order',
     targetHandle: 'left',
-    type: 'umlEdge',
+    type: 'classUmlEdge',
     data: { relationType: 'association' },
   },
 ];
@@ -76,7 +76,7 @@ function createEdge(connection: Connection, type: DiagramRelationType): UmlDiagr
     sourceHandle: connection.sourceHandle,
     target: connection.target,
     targetHandle: connection.targetHandle,
-    type: 'umlEdge',
+    type: 'classUmlEdge',
     data: { relationType: normalizeRelation(type) },
   };
 }
@@ -85,7 +85,7 @@ export function updateClassEdgeRelation(
   edge: DiagramEdge,
   type: DiagramRelationType
 ): DiagramEdge {
-  if (edge.type !== 'umlEdge') return edge;
+  if (edge.type !== 'classUmlEdge') return edge;
   return {
     ...edge,
     data: { ...edge.data, relationType: normalizeRelation(type) },

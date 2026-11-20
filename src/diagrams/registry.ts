@@ -17,7 +17,15 @@ export function updateEdgeRelation(
   edge: DiagramEdge,
   relationType: DiagramRelationType
 ): DiagramEdge {
-  return edge.type === 'flowchartEdge'
-    ? updateFlowchartEdgeRelation(edge, relationType)
-    : updateClassEdgeRelation(edge, relationType);
+  if (edge.type === 'flowchartEdge') return updateFlowchartEdgeRelation(edge, relationType);
+  if (edge.type === 'classUmlEdge') return updateClassEdgeRelation(edge, relationType);
+  // USE_CASE intentionally retains the existing 'umlEdge' renderer and data shape.
+  if (String(edge.type) === 'umlEdge') {
+    const allowed = ['association', 'include', 'extend', 'generalization'];
+    return {
+      ...edge,
+      data: { ...edge.data, relationType: allowed.includes(relationType) ? relationType : 'association' },
+    } as DiagramEdge;
+  }
+  return edge;
 }

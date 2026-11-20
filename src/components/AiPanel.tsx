@@ -30,7 +30,7 @@ type Props = {
 
 function AiPanel({
   purpose, onPurposeChange, result, loading, error, onAnalyze, onClose,
-  diagramType, editPreview, editLoading, editError,
+  editPreview, editLoading, editError,
   isPreviewVisible, onProposeEdit, onShowPreview, onShowOriginal,
   onApplyEdit, onCancelEdit,
 }: Props) {
@@ -86,11 +86,9 @@ function AiPanel({
                     type="button"
                     className="ai-edit-propose-button"
                     onClick={() => onProposeEdit(issue, index)}
-                    disabled={loading || editLoading || Boolean(editPreview) || diagramType === 'USE_CASE'}
-                    title={diagramType === 'USE_CASE'
-                      ? '유스케이스 편집기 자동 수정 연결 후 지원됩니다.' : undefined}
+                    disabled={loading || editLoading || Boolean(editPreview)}
                   >
-                    {diagramType === 'USE_CASE' ? '자동 수정 준비 중' : '수정안 만들기'}
+                    수정안 만들기
                   </button>
                   <button
                     type="button"

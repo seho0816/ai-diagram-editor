@@ -32,5 +32,5 @@ export type UmlEdgeData = {
 
 export type UmlDiagramEdge = Edge<
     UmlEdgeData,
-    'umlEdge'
+    'classUmlEdge'
 >;

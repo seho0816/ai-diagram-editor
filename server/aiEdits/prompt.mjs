@@ -1,5 +1,7 @@
 const CLASS_RELATIONS = ['association', 'generalization', 'aggregation', 'composition', 'dependency'];
 const FLOW_RELATIONS = ['flow', 'yes', 'no'];
+const USECASE_RELATIONS = ['association', 'include', 'extend', 'generalization'];
+const USECASE_SHAPES = ['actorNode', 'useCaseNode', 'boundaryNode', 'subsystem', 'externalSystem', 'note'];
 
 export const operationResponseSchema = {
   type: 'object',
@@ -20,8 +22,8 @@ export const operationResponseSchema = {
           removeAttributes: { type: 'array', items: { type: 'string' } },
           methods: { type: 'array', items: { type: 'string' } },
           label: { type: 'string' },
-          shape: { type: 'string', enum: ['', 'startEnd', 'process', 'decision', 'inputOutput'] },
-          relationType: { type: 'string', enum: ['', ...CLASS_RELATIONS, ...FLOW_RELATIONS] },
+          shape: { type: 'string', enum: ['', 'startEnd', 'process', 'decision', 'inputOutput', ...USECASE_SHAPES] },
+          relationType: { type: 'string', enum: [...new Set(['', ...CLASS_RELATIONS, ...FLOW_RELATIONS, ...USECASE_RELATIONS])] },
           sourceMultiplicity: { type: 'string' },
           targetMultiplicity: { type: 'string' },
         },
@@ -39,11 +41,13 @@ export const operationResponseSchema = {
 };
 
 export function buildEditPrompt({ diagramType, purpose, nodes, edges, issue }) {
-  const nodeType = diagramType === 'CLASS' ? 'classNode' : 'flowchartNode';
-  const relations = diagramType === 'CLASS' ? CLASS_RELATIONS : FLOW_RELATIONS;
+  const nodeType = diagramType === 'CLASS' ? 'classNode' : diagramType === 'USE_CASE' ? 'actorNode/useCaseNode/boundaryNode/subsystem/externalSystem/note' : 'flowchartNode';
+  const relations = diagramType === 'CLASS' ? CLASS_RELATIONS : diagramType === 'USE_CASE' ? USECASE_RELATIONS : FLOW_RELATIONS;
   const domainInstructions = diagramType === 'CLASS'
     ? '클래스의 ADD_NODE에는 className/attributes/methods를 채웁니다. UPDATE_NODE에는 className을 입력하고 attributes와 methods에는 새로 추가할 항목만 넣습니다. 기존 속성을 없애야 하는 경우 removeAttributes에 원본 노드 data.attributes 배열의 문자열을 정확히 복사하여 넣습니다(예: "- userId: Long"). 삭제가 필요하지 않으면 removeAttributes=[]로 둡니다. 속성 삭제는 사용자가 미리보기 후 승인했을 때만 적용됩니다.'
-    : 'ADD_NODE/UPDATE_NODE에 label과 shape(startEnd/process/decision/inputOutput)를 채웁니다. 기존 flowchart 노드 UPDATE_NODE 시 기존 형태와 라벨을 가능한 유지합니다.';
+    : diagramType === 'USE_CASE'
+      ? '유스케이스 ADD_NODE는 shape(actorNode/useCaseNode/boundaryNode/subsystem/externalSystem/note)와 label을 채웁니다. UPDATE_NODE는 기존 노드 ID와 label을 채우고, shape은 기존 type과 동일하거나 빈 문자열로 둡니다. boundaryNode는 data.title이 이름이고 다른 종류는 data.label입니다. ADD_EDGE/UPDATE_EDGE는 association/include/extend/generalization만 사용하며 관계선 type은 umlEdge입니다. boundaryNode에는 연결 핸들이 없으므로 새 관계선의 시작/끝으로 선택하지 마세요. 기존 노드 위치와 크기, 연결 방향을 유지하세요.'
+      : 'ADD_NODE/UPDATE_NODE에 label과 shape(startEnd/process/decision/inputOutput)를 채웁니다. 기존 flowchart 노드 UPDATE_NODE 시 기존 형태와 라벨을 가능한 유지합니다.';
 
   return `당신은 다이어그램의 분석 결과를 안전하게 수정 연산으로 바꾸는 도우미입니다.
 수정 대상 다이어그램: ${diagramType}; 노드 타입: ${nodeType}; 허용 관계 종류: ${relations.join(', ')}.

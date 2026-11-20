@@ -1,5 +1,8 @@
 const CLASS_RELATIONS = new Set(['association', 'generalization', 'aggregation', 'composition', 'dependency']);
 const FLOW_RELATIONS = new Set(['flow', 'yes', 'no']);
+const USECASE_RELATIONS = new Set(['association', 'include', 'extend', 'generalization']);
+const USECASE_NODES = new Set(['actorNode', 'useCaseNode', 'boundaryNode', 'subsystem', 'externalSystem', 'note']);
+const CONNECTABLE_USECASE_NODES = new Set(['actorNode', 'useCaseNode', 'subsystem', 'externalSystem', 'note']);
 const SHAPES = new Set(['startEnd', 'process', 'decision', 'inputOutput']);
 function attributeToken(value) {
   return typeof value === 'string'
@@ -24,12 +27,14 @@ function textLines(value) {
 // Model output is untrusted. Invalid or unsupported operations are discarded.
 export function normalizeAiEditProposal(raw, { diagramType, nodes, edges }) {
   const nodeType = diagramType === 'CLASS' ? 'classNode' : 'flowchartNode';
-  const edgeType = diagramType === 'CLASS' ? 'umlEdge' : 'flowchartEdge';
-  const relations = diagramType === 'CLASS' ? CLASS_RELATIONS : FLOW_RELATIONS;
+  const isUseCase = diagramType === 'USE_CASE';
+  const edgeType = diagramType === 'CLASS' ? 'classUmlEdge' : isUseCase ? 'umlEdge' : 'flowchartEdge';
+  const relations = diagramType === 'CLASS' ? CLASS_RELATIONS : isUseCase ? USECASE_RELATIONS : FLOW_RELATIONS;
   const knownNodes = new Map(nodes.map((node) => [node.id, node.type]));
   const nodeData = new Map(nodes.map((node) => [node.id, node.data]));
   const knownEdges = new Map(edges.map((edge) => [edge.id, edge.type]));
   const aliases = new Set();
+  const aliasShapes = new Map();
   const operations = [];
 
   for (const rawOperation of (Array.isArray(raw?.operations) ? raw.operations : []).slice(0, 4)) {
@@ -60,10 +65,13 @@ export function normalizeAiEditProposal(raw, { diagramType, nodes, edges }) {
         aliases.has(op.tempId) || knownNodes.has(op.tempId)) continue;
       if (diagramType === 'CLASS' && !op.className) continue;
       if (diagramType === 'FLOWCHART' && (!op.label || !SHAPES.has(op.shape))) continue;
+      if (isUseCase && (!op.label || !USECASE_NODES.has(op.shape))) continue;
       if (op.removeAttributes.length) continue;
       aliases.add(op.tempId);
+      if (isUseCase) aliasShapes.set(op.tempId, op.shape);
     } else if (op.kind === 'UPDATE_NODE') {
-      if (knownNodes.get(op.targetId) !== nodeType) continue;
+      const existingNodeType = knownNodes.get(op.targetId);
+      if (isUseCase ? !USECASE_NODES.has(existingNodeType) : existingNodeType !== nodeType) continue;
       if (diagramType === 'CLASS') {
         if (!op.className) continue;
         const existing = nodeData.get(op.targetId)?.attributes;
@@ -72,9 +80,12 @@ export function normalizeAiEditProposal(raw, { diagramType, nodes, edges }) {
         if (op.removeAttributes.some((attr) => !available.has(attributeToken(attr)))) continue;
       }
       if (diagramType === 'FLOWCHART' && (!op.label || !SHAPES.has(op.shape) || op.removeAttributes.length)) continue;
+      if (isUseCase && (!op.label || (op.shape && op.shape !== existingNodeType) || op.removeAttributes.length)) continue;
     } else if (op.kind === 'ADD_EDGE') {
       if (op.removeAttributes.length) continue;
-      const validNode = (id) => knownNodes.get(id) === nodeType || aliases.has(id);
+      const validNode = (id) => isUseCase
+        ? CONNECTABLE_USECASE_NODES.has(knownNodes.get(id)) || (aliases.has(id) && CONNECTABLE_USECASE_NODES.has(aliasShapes.get(id)))
+        : knownNodes.get(id) === nodeType || aliases.has(id);
       if (!validNode(op.source) || !validNode(op.target) || !relations.has(op.relationType)) continue;
     } else if (op.kind === 'UPDATE_EDGE') {
       if (op.removeAttributes.length) continue;

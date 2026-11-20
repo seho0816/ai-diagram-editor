@@ -12,7 +12,7 @@ const issueSchema = z.object({
 });
 
 const requestSchema = z.object({
-  diagramType: z.enum(['CLASS', 'FLOWCHART']),
+  diagramType: z.enum(['CLASS', 'FLOWCHART', 'USE_CASE']),
   purpose: z.string().trim().min(1).max(2000),
   issue: issueSchema,
   nodes: z.array(z.object({
