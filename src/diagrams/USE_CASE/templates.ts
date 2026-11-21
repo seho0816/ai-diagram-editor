@@ -146,5 +146,145 @@ const smallShop: UseCaseTemplate = {
 };
 // ===== 2026-11-18 추가 끝 =====
 
-// 2026-11-18 수정: 파일 맨 아래로 옮기고 쇼핑몰, 소상공인 상점 추가 (이전: [butcherShop])
-export const useCaseTemplates: UseCaseTemplate[] = [butcherShop, shoppingMall, smallShop];
+// ===== 2026-11-18 추가: 학교 도서관 템플릿 =====
+const library: UseCaseTemplate = {
+  id: 'library',
+  label: '학교 도서관',
+  nodes: [
+    {
+      id: 'lb-boundary',
+      type: 'boundaryNode',
+      position: { x: 300, y: 40 },
+      zIndex: -1,
+      style: { width: 270, height: 650 },
+      data: { title: '도서관 시스템' },
+    },
+    actor('lb-student', '학생', 60, 220),
+    actor('lb-librarian', '사서', 680, 330),
+    useCase('lb-search', '도서 검색', 90),
+    useCase('lb-borrow', '대출하기', 200),
+    useCase('lb-return', '반납하기', 310),
+    useCase('lb-reserve', '도서 예약', 420),
+    useCase('lb-manage', '도서 관리', 530),
+  ] as unknown as DiagramNode[],
+  edges: [
+    edge('lb-e1', 'lb-student', 'right', 'lb-search', 'left'),
+    edge('lb-e2', 'lb-student', 'right', 'lb-borrow', 'left'),
+    edge('lb-e3', 'lb-student', 'right', 'lb-return', 'left'),
+    edge('lb-e4', 'lb-student', 'right', 'lb-reserve', 'left'),
+    edge('lb-e5', 'lb-librarian', 'left', 'lb-manage', 'right'),
+    edge('lb-e6', 'lb-librarian', 'left', 'lb-borrow', 'right'),
+    edge('lb-e7', 'lb-borrow', 'bottom', 'lb-search', 'top', 'extend'),
+  ] as unknown as DiagramEdge[],
+};
+// ===== 2026-11-18 추가 끝 =====
+
+// ===== 2026-11-18 추가: 병원 예약 템플릿 =====
+const hospital: UseCaseTemplate = {
+  id: 'hospital',
+  label: '병원 예약',
+  nodes: [
+    {
+      id: 'hp-boundary',
+      type: 'boundaryNode',
+      position: { x: 300, y: 40 },
+      zIndex: -1,
+      style: { width: 270, height: 650 },
+      data: { title: '병원 예약 시스템' },
+    },
+    actor('hp-patient', '환자', 60, 160),
+    actor('hp-staff', '접수 직원', 60, 400),
+    actor('hp-doctor', '의사', 680, 330),
+    useCase('hp-reserve', '진료 예약', 90),
+    useCase('hp-cancel', '예약 취소', 200),
+    useCase('hp-check', '접수 확인', 310),
+    useCase('hp-record', '진료 기록 작성', 420),
+    useCase('hp-pay', '진료비 수납', 530),
+  ] as unknown as DiagramNode[],
+  edges: [
+    edge('hp-e1', 'hp-patient', 'right', 'hp-reserve', 'left'),
+    edge('hp-e2', 'hp-patient', 'right', 'hp-cancel', 'left'),
+    edge('hp-e3', 'hp-staff', 'right', 'hp-check', 'left'),
+    edge('hp-e4', 'hp-staff', 'right', 'hp-pay', 'left'),
+    edge('hp-e5', 'hp-doctor', 'left', 'hp-record', 'right'),
+    edge('hp-e6', 'hp-reserve', 'bottom', 'hp-check', 'top', 'include'),
+    edge('hp-e7', 'hp-cancel', 'bottom', 'hp-reserve', 'top', 'extend'),
+  ] as unknown as DiagramEdge[],
+};
+// ===== 2026-11-18 추가 끝 =====
+
+// ===== 2026-11-18 추가: 배달앱 템플릿 =====
+const deliveryApp: UseCaseTemplate = {
+  id: 'delivery-app',
+  label: '배달앱',
+  nodes: [
+    {
+      id: 'dl-boundary',
+      type: 'boundaryNode',
+      position: { x: 300, y: 40 },
+      zIndex: -1,
+      style: { width: 270, height: 650 },
+      data: { title: '배달앱 시스템' },
+    },
+    actor('dl-customer', '고객', 60, 160),
+    actor('dl-store', '가게 사장', 680, 160),
+    actor('dl-rider', '라이더', 680, 440),
+    useCase('dl-search', '가게 검색', 90),
+    useCase('dl-order', '음식 주문', 200),
+    useCase('dl-pay', '결제하기', 310),
+    useCase('dl-accept', '주문 접수', 420),
+    useCase('dl-deliver', '배달하기', 530),
+  ] as unknown as DiagramNode[],
+  edges: [
+    edge('dl-e1', 'dl-customer', 'right', 'dl-search', 'left'),
+    edge('dl-e2', 'dl-customer', 'right', 'dl-order', 'left'),
+    edge('dl-e3', 'dl-store', 'left', 'dl-accept', 'right'),
+    edge('dl-e4', 'dl-rider', 'left', 'dl-deliver', 'right'),
+    edge('dl-e5', 'dl-order', 'bottom', 'dl-pay', 'top', 'include'),
+    edge('dl-e6', 'dl-accept', 'bottom', 'dl-deliver', 'top', 'include'),
+  ] as unknown as DiagramEdge[],
+};
+// ===== 2026-11-18 추가 끝 =====
+
+// ===== 2026-11-18 추가: 카페 키오스크 템플릿 =====
+const cafeKiosk: UseCaseTemplate = {
+  id: 'cafe-kiosk',
+  label: '카페 키오스크',
+  nodes: [
+    {
+      id: 'ck-boundary',
+      type: 'boundaryNode',
+      position: { x: 300, y: 40 },
+      zIndex: -1,
+      style: { width: 270, height: 650 },
+      data: { title: '키오스크 시스템' },
+    },
+    actor('ck-customer', '손님', 60, 220),
+    actor('ck-manager', '점장', 680, 330),
+    useCase('ck-menu', '메뉴 선택', 90),
+    useCase('ck-option', '옵션 선택', 200),
+    useCase('ck-pay', '결제하기', 310),
+    useCase('ck-point', '포인트 적립', 420),
+    useCase('ck-stock', '재고 관리', 530),
+  ] as unknown as DiagramNode[],
+  edges: [
+    edge('ck-e1', 'ck-customer', 'right', 'ck-menu', 'left'),
+    edge('ck-e2', 'ck-customer', 'right', 'ck-pay', 'left'),
+    edge('ck-e3', 'ck-manager', 'left', 'ck-stock', 'right'),
+    edge('ck-e4', 'ck-menu', 'bottom', 'ck-pay', 'top', 'include'),
+    edge('ck-e5', 'ck-option', 'bottom', 'ck-menu', 'top', 'extend'),
+    edge('ck-e6', 'ck-point', 'bottom', 'ck-pay', 'top', 'extend'),
+  ] as unknown as DiagramEdge[],
+};
+// ===== 2026-11-18 추가 끝 =====
+
+// 2026-11-18 수정: 도서관, 병원, 배달앱, 카페 추가 (이전: [butcherShop, shoppingMall, smallShop])
+export const useCaseTemplates: UseCaseTemplate[] = [
+  butcherShop,
+  shoppingMall,
+  smallShop,
+  library,
+  hospital,
+  deliveryApp,
+  cafeKiosk,
+];
