@@ -18,6 +18,14 @@ export interface ShapeSidebarProps {
   // ===== 2026-11-12 추가 (템플릿) =====
   onLoadTemplate?: (nodes: DiagramNode[], edges: DiagramEdge[]) => void;
   // ===== 2026-11-12 추가 끝 =====
+  // ===== 2026-11-18 추가 (자동 정렬) =====
+  onAutoLayout?: (
+    layout: (nodes: DiagramNode[], edges: DiagramEdge[]) => DiagramNode[]
+  ) => void;
+  // ===== 2026-11-18 추가 끝 =====
+  // ===== 2026-11-18 추가 (관계선 방향 반전) =====
+  onReverseEdge?: () => void;
+  // ===== 2026-11-18 추가 끝 =====
 }
 
 function ShapeSidebar({
@@ -30,6 +38,8 @@ function ShapeSidebar({
   hasSelectedEdge,
   hasSelection,
   onLoadTemplate, // ===== 2026-11-12 추가 (템플릿) =====
+  onAutoLayout, // ===== 2026-11-18 추가 (자동 정렬) =====
+  onReverseEdge, // ===== 2026-11-18 추가 (관계선 방향 반전) =====
 }: ShapeSidebarProps) {
   const [expandedGroup, setExpandedGroup] = useState<string | null>(String(diagramType));
   useEffect(() => { setExpandedGroup(String(diagramType)); }, [diagramType]);
@@ -73,6 +83,13 @@ function ShapeSidebar({
               onLoadTemplate={onLoadTemplate}
               canLoadTemplate={diagramType === 'USE_CASE'}
               // ===== 2026-11-12 추가 끝 =====
+              // ===== 2026-11-18 추가 (자동 정렬) =====
+              onAutoLayout={onAutoLayout}
+              canAutoLayout={diagramType === 'USE_CASE'}
+              // ===== 2026-11-18 추가 끝 =====
+              // ===== 2026-11-18 추가 (관계선 방향 반전) =====
+              onReverseEdge={onReverseEdge}
+              // ===== 2026-11-18 추가 끝 =====
             />
           </DiagramToolGroup>
       )}
