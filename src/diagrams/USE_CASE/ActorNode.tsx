@@ -16,7 +16,7 @@ function ActorNode({ data, selected }: NodeProps<ActorNodeType>) {
         minWidth={70}
         minHeight={80}
         keepAspectRatio
-        lineStyle={{ borderColor: '#2563eb' }}
+        lineStyle={{ borderColor: '#1d4ed8' }} // 2026-11-18 스타일
         handleStyle={{ width: 8, height: 8, borderRadius: 2 }}
       />
       <div
@@ -26,7 +26,7 @@ function ActorNode({ data, selected }: NodeProps<ActorNodeType>) {
           minWidth: 70,
           minHeight: 80,
           backgroundColor: 'transparent',
-          border: selected ? '1.5px dashed #2563eb' : '1.5px dashed transparent',
+          border: selected ? '2px dashed #1d4ed8' : '2px dashed transparent', // 2026-11-18 스타일
           borderRadius: '8px',
           display: 'flex',
           flexDirection: 'column',
@@ -43,6 +43,7 @@ function ActorNode({ data, selected }: NodeProps<ActorNodeType>) {
             type="source"
             position={h.position}
             style={{
+              background: '#1d4ed8', // 2026-11-18 스타일
               opacity: selected ? 1 : 0,
               transition: 'opacity 0.15s',
             }}
@@ -51,8 +52,8 @@ function ActorNode({ data, selected }: NodeProps<ActorNodeType>) {
         <svg
           viewBox="0 0 24 32"
           fill="none"
-          stroke="#1e293b"
-          strokeWidth="2"
+          stroke="#0f172a" // 2026-11-18 스타일
+          strokeWidth="2.4" // 2026-11-18 스타일
           strokeLinecap="round"
           strokeLinejoin="round"
           style={{ flex: 1, minHeight: 0, width: '60%', marginTop: '6px', marginBottom: '4px' }}
@@ -62,9 +63,9 @@ function ActorNode({ data, selected }: NodeProps<ActorNodeType>) {
         </svg>
         <div
           style={{
-            fontSize: '12px',
-            fontWeight: 700,
-            color: '#1e293b',
+            fontSize: '14px', // 2026-11-18 스타일
+            fontWeight: 800, // 2026-11-18 스타일
+            color: '#0f172a', // 2026-11-18 스타일
             textAlign: 'center',
             width: '100%',
             padding: '0 4px 6px',

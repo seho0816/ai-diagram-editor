@@ -15,7 +15,7 @@ function UseCaseNode({ data, selected }: NodeProps<UseCaseNodeType>) {
         isVisible={selected}
         minWidth={100}
         minHeight={50}
-        lineStyle={{ borderColor: '#2563eb' }}
+        lineStyle={{ borderColor: '#1d4ed8' }} // 2026-11-18 스타일
         handleStyle={{ width: 8, height: 8, borderRadius: 2 }}
       />
       <div
@@ -25,13 +25,13 @@ function UseCaseNode({ data, selected }: NodeProps<UseCaseNodeType>) {
           minWidth: 100,
           minHeight: 50,
           borderRadius: '50% / 50%',
-          backgroundColor: '#ffffff',
-          border: selected ? '2.5px solid #2563eb' : '2px solid #1e293b',
+          backgroundColor: selected ? '#dbeafe' : '#eff6ff', // 2026-11-18 스타일
+          border: selected ? '3px solid #1d4ed8' : '2.5px solid #1d4ed8', // 2026-11-18 스타일
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           textAlign: 'center',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+          boxShadow: '0 4px 10px rgba(29, 78, 216, 0.18)', // 2026-11-18 스타일
           position: 'relative',
           boxSizing: 'border-box',
         }}
@@ -43,7 +43,7 @@ function UseCaseNode({ data, selected }: NodeProps<UseCaseNodeType>) {
             type="source"
             position={h.position}
             style={{
-              background: '#2563eb',
+              background: '#1d4ed8', // 2026-11-18 스타일
               opacity: selected ? 1 : 0,
               transition: 'opacity 0.15s',
             }}
@@ -51,9 +51,9 @@ function UseCaseNode({ data, selected }: NodeProps<UseCaseNodeType>) {
         ))}
         <span
           style={{
-            fontSize: '13px',
-            fontWeight: 700,
-            color: '#1e293b',
+            fontSize: '14px', // 2026-11-18 스타일
+            fontWeight: 800, // 2026-11-18 스타일
+            color: '#0f172a', // 2026-11-18 스타일
             padding: '0 16px',
             overflow: 'hidden',
             textOverflow: 'ellipsis',

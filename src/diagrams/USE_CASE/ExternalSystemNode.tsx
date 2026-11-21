@@ -16,7 +16,7 @@ export function ExternalSystemNode({ data, selected }: NodeProps) {
         isVisible={selected}
         minWidth={110}
         minHeight={40}
-        lineStyle={{ borderColor: '#2563eb' }}
+        lineStyle={{ borderColor: '#1d4ed8' }} // 2026-11-18 스타일
         handleStyle={{ width: 8, height: 8, borderRadius: 2 }}
       />
       <div
@@ -31,13 +31,13 @@ export function ExternalSystemNode({ data, selected }: NodeProps) {
           alignItems: 'center',
           justifyContent: 'center',
           background: '#ffffff',
-          border: selected ? '2.5px solid #2563eb' : '2px solid #1e293b',
+          border: selected ? '3px solid #1d4ed8' : '2.5px solid #0f172a', // 2026-11-18 스타일
           borderRadius: '8px',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+          boxShadow: '0 4px 10px rgba(15, 23, 42, 0.15)', // 2026-11-18 스타일
           textAlign: 'center',
-          fontSize: '12px',
-          fontWeight: 700,
-          color: '#1e293b',
+          fontSize: '14px', // 2026-11-18 스타일
+          fontWeight: 800, // 2026-11-18 스타일
+          color: '#0f172a', // 2026-11-18 스타일
         }}
       >
         {handles.map((h) => (
@@ -47,6 +47,7 @@ export function ExternalSystemNode({ data, selected }: NodeProps) {
             type="source"
             position={h.position}
             style={{
+              background: '#1d4ed8', // 2026-11-18 스타일
               opacity: selected ? 1 : 0,
               transition: 'opacity 0.15s',
             }}

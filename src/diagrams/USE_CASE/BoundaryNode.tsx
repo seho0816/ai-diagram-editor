@@ -9,7 +9,7 @@ function BoundaryNode({ data, selected }: NodeProps<BoundaryNodeType>) {
         isVisible={selected}
         minWidth={150}
         minHeight={100}
-        lineStyle={{ borderColor: '#2563eb' }}
+        lineStyle={{ borderColor: '#1d4ed8' }} // 2026-11-18 스타일
         handleStyle={{ width: 8, height: 8, borderRadius: 2 }}
       />
       <div
@@ -19,24 +19,24 @@ function BoundaryNode({ data, selected }: NodeProps<BoundaryNodeType>) {
           minWidth: 150,
           minHeight: 100,
           boxSizing: 'border-box',
-          border: selected ? '2px dashed #2563eb' : '2px dashed #94a3b8',
-          borderRadius: '8px',
+          border: selected ? '3px dashed #1d4ed8' : '2.5px dashed #1d4ed8', // 2026-11-18 스타일
+          borderRadius: '10px', // 2026-11-18 스타일
           background: selected
-            ? 'rgba(37, 99, 235, 0.06)'
-            : 'rgba(248, 250, 252, 0.4)',
+            ? 'rgba(29, 78, 216, 0.08)' // 2026-11-18 스타일
+            : 'rgba(248, 250, 252, 0.6)', // 2026-11-18 스타일
           position: 'relative',
         }}
       >
         <div
           style={{
             position: 'absolute',
-            top: '-12px',
+            top: '-14px', // 2026-11-18 스타일
             left: '16px',
             background: '#fff',
-            padding: '0 8px',
-            fontSize: '13px',
-            fontWeight: 600,
-            color: '#1e293b',
+            padding: '0 10px', // 2026-11-18 스타일
+            fontSize: '15px', // 2026-11-18 스타일
+            fontWeight: 800, // 2026-11-18 스타일
+            color: '#1d4ed8', // 2026-11-18 스타일
             maxWidth: 'calc(100% - 48px)',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
