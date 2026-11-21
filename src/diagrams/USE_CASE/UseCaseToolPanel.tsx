@@ -1,13 +1,23 @@
 import type { ReactNode } from 'react';
 import type { UseCaseRelationType, DiagramNode, DiagramEdge } from '../../types/diagram'; // 2026-11-12 수정: DiagramNode, DiagramEdge 추가
 import type { RelationToolProps } from '../toolPanelTypes';
-import { useCaseTemplates } from './templates'; // 2026-11-12 추가
+import { useCaseTemplates } from './templates'; // 기존
+// ===== 2026-11-18 추가 =====
+import { autoLayoutUseCase } from './autoLayout';
+// ===== 2026-11-18 추가 끝 =====
 
 type Props = RelationToolProps & {
   onAddNode: (toolType: string) => void;
   // 2026-11-12 추가: 템플릿 불러오기 (유스케이스 모드일 때만 활성화)
   onLoadTemplate?: (nodes: DiagramNode[], edges: DiagramEdge[]) => void;
   canLoadTemplate?: boolean;
+  // ===== 2026-11-18 추가: 자동 정렬 =====
+  onAutoLayout?: (layout: typeof autoLayoutUseCase) => void;
+  canAutoLayout?: boolean;
+  // ===== 2026-11-18 추가 끝 =====
+  // ===== 2026-11-18 추가: 관계선 방향 반전 =====
+  onReverseEdge?: () => void;
+  // ===== 2026-11-18 추가 끝 =====
 };
 
 const useCaseRelations: { type: UseCaseRelationType; label: string }[] = [
@@ -92,6 +102,9 @@ function UseCaseToolPanel({
   hasSelectedEdge,
   onLoadTemplate, // 2026-11-12 추가
   canLoadTemplate = false, // 2026-11-12 추가
+  onAutoLayout, // 2026-11-18 추가
+  canAutoLayout = false, // 2026-11-18 추가
+  onReverseEdge, // 2026-11-18 추가 (관계선 방향 반전)
 }: Props) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', margin: '-8px 0 0 0' }}>
@@ -140,6 +153,23 @@ function UseCaseToolPanel({
           </div>
         </div>
       </div>
+
+      {/* ===== 2026-11-18 추가: 자동 정렬 ===== */}
+      {onAutoLayout && (
+        <div className="tool-section" style={{ marginTop: '4px' }}>
+          <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#475569' }}>자동 정렬</h4>
+          <button
+            type="button"
+            className="sidebar-action-button"
+            disabled={!canAutoLayout}
+            title={canAutoLayout ? '액터는 양옆, 유스케이스는 세로로 정렬합니다' : '상단에서 유스케이스를 선택하세요'}
+            onClick={() => onAutoLayout(autoLayoutUseCase)}
+          >
+            자동 정렬 실행
+          </button>
+        </div>
+      )}
+      {/* ===== 2026-11-18 추가 끝 ===== */}
 
       {/* 2026-11-12 추가: 사례 템플릿 */}
       {onLoadTemplate && (
@@ -195,6 +225,21 @@ function UseCaseToolPanel({
         >
           선택한 관계선 종류 변경
         </button>
+
+        {/* ===== 2026-11-18 추가: 관계선 방향 반전 ===== */}
+        {onReverseEdge && (
+          <button
+            type="button"
+            className="sidebar-action-button"
+            style={{ marginTop: '6px' }}
+            onClick={onReverseEdge}
+            disabled={!hasSelectedEdge}
+            title="선택한 관계선의 시작과 끝을 바꿉니다"
+          >
+            선택한 관계선 방향 반전
+          </button>
+        )}
+        {/* ===== 2026-11-18 추가 끝 ===== */}
       </div>
     </div>
   );
