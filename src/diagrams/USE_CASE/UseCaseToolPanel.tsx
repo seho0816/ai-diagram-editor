@@ -1,3 +1,4 @@
+import { useState } from 'react'; // 2026-11-18 추가 (템플릿 접기)
 import type { ReactNode } from 'react';
 import type { UseCaseRelationType, DiagramNode, DiagramEdge } from '../../types/diagram'; // 2026-11-12 수정: DiagramNode, DiagramEdge 추가
 import type { RelationToolProps } from '../toolPanelTypes';
@@ -94,6 +95,22 @@ const nodeTools: { type: string; label: string; title: string; icon: ReactNode }
   },
 ];
 
+// ===== 2026-11-18 추가: 사이드바 스타일 (발표용 진한 블루 포인트) =====
+const sectionTitleStyle = {
+  margin: '0 0 8px 0',
+  fontSize: '14px',
+  fontWeight: 800,
+  color: '#1d4ed8',
+};
+
+const actionButtonStyle = {
+  fontWeight: 700,
+  color: '#0f172a',
+  border: '1.5px solid #93c5fd',
+  borderRadius: '8px',
+};
+// ===== 2026-11-18 추가 끝 =====
+
 function UseCaseToolPanel({
   onAddNode,
   relationType,
@@ -106,19 +123,22 @@ function UseCaseToolPanel({
   canAutoLayout = false, // 2026-11-18 추가
   onReverseEdge, // 2026-11-18 추가 (관계선 방향 반전)
 }: Props) {
+  const [templatesOpen, setTemplatesOpen] = useState(false); // 2026-11-18 추가 (템플릿 접기, 기본 접힘)
+  const [hoveredTool, setHoveredTool] = useState<string | null>(null); // 2026-11-18 추가 (팔레트 hover)
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', margin: '-8px 0 0 0' }}>
       {/* 유스케이스 팔레트 박스 */}
-      <div style={{ border: '1px solid #cbd5e1', borderRadius: '6px', overflow: 'hidden', background: '#ffffff' }}>
+      <div style={{ border: '1.5px solid #93c5fd', borderRadius: '8px', overflow: 'hidden', background: '#ffffff' }}> {/* 2026-11-18 스타일 */}
         <div
           style={{
             width: '100%',
             padding: '10px 12px',
-            backgroundColor: '#eff6ff',
-            borderBottom: '1px solid #cbd5e1',
+            backgroundColor: '#dbeafe', // 2026-11-18 스타일
+            borderBottom: '1.5px solid #93c5fd', // 2026-11-18 스타일
             fontSize: '14px',
-            fontWeight: '600',
-            color: '#1e293b',
+            fontWeight: 800, // 2026-11-18 스타일
+            color: '#1d4ed8', // 2026-11-18 스타일
           }}
         >
           유스케이스 (Use Case) 팔레트
@@ -131,6 +151,8 @@ function UseCaseToolPanel({
                 key={tool.type}
                 type="button"
                 onClick={() => onAddNode(tool.type)}
+                onMouseEnter={() => setHoveredTool(tool.type)} // 2026-11-18 추가
+                onMouseLeave={() => setHoveredTool(null)} // 2026-11-18 추가
                 title={tool.title}
                 style={{
                   display: 'flex',
@@ -139,15 +161,16 @@ function UseCaseToolPanel({
                   justifyContent: 'center',
                   gap: '6px',
                   padding: '12px 8px',
-                  background: '#f8fafc',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '6px',
+                  background: hoveredTool === tool.type ? '#dbeafe' : '#f8fafc', // 2026-11-18 스타일
+                  border: hoveredTool === tool.type ? '1.5px solid #2563eb' : '1.5px solid #cbd5e1', // 2026-11-18 스타일
+                  borderRadius: '8px', // 2026-11-18 스타일
                   cursor: 'pointer',
                   width: '100%',
+                  transition: 'background 0.12s, border-color 0.12s', // 2026-11-18 추가
                 }}
               >
                 {tool.icon}
-                <span style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>{tool.label}</span>
+                <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>{tool.label}</span> {/* 2026-11-18 스타일 */}
               </button>
             ))}
           </div>
@@ -157,10 +180,11 @@ function UseCaseToolPanel({
       {/* ===== 2026-11-18 추가: 자동 정렬 ===== */}
       {onAutoLayout && (
         <div className="tool-section" style={{ marginTop: '4px' }}>
-          <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#475569' }}>자동 정렬</h4>
+          <h4 style={sectionTitleStyle}>자동 정렬</h4>
           <button
             type="button"
             className="sidebar-action-button"
+            style={actionButtonStyle}
             disabled={!canAutoLayout}
             title={canAutoLayout ? '액터는 양옆, 유스케이스는 세로로 정렬합니다' : '상단에서 유스케이스를 선택하세요'}
             onClick={() => onAutoLayout(autoLayoutUseCase)}
@@ -171,33 +195,40 @@ function UseCaseToolPanel({
       )}
       {/* ===== 2026-11-18 추가 끝 ===== */}
 
-      {/* 2026-11-12 추가: 사례 템플릿 */}
+      {/* 2026-11-12 추가: 사례 템플릿 (2026-11-18 수정: 접었다 펴기) */}
       {onLoadTemplate && (
         <div className="tool-section" style={{ marginTop: '4px' }}>
-          <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#475569' }}>사례 템플릿</h4>
-          {useCaseTemplates.map((template) => (
-            <button
-              key={template.id}
-              type="button"
-              className="sidebar-action-button"
-              style={{ marginBottom: '6px' }}
-              disabled={!canLoadTemplate}
-              title={canLoadTemplate ? '현재 캔버스를 이 사례로 바꿉니다' : '상단에서 유스케이스를 선택하세요'}
-              onClick={() => {
-                if (window.confirm('현재 캔버스 내용이 사라집니다. 불러올까요?')) {
-                  onLoadTemplate(template.nodes, template.edges);
-                }
-              }}
-            >
-              {template.label}
-            </button>
-          ))}
+          <h4
+            style={{ ...sectionTitleStyle, cursor: 'pointer', userSelect: 'none' }}
+            onClick={() => setTemplatesOpen((open) => !open)}
+            title="클릭해서 펼치거나 접습니다"
+          >
+            {templatesOpen ? '▼' : '▶'} 사례 템플릿 ({useCaseTemplates.length})
+          </h4>
+          {templatesOpen &&
+            useCaseTemplates.map((template) => (
+              <button
+                key={template.id}
+                type="button"
+                className="sidebar-action-button"
+                style={{ ...actionButtonStyle, marginBottom: '6px' }}
+                disabled={!canLoadTemplate}
+                title={canLoadTemplate ? '현재 캔버스를 이 사례로 바꿉니다' : '상단에서 유스케이스를 선택하세요'}
+                onClick={() => {
+                  if (window.confirm('현재 캔버스 내용이 사라집니다. 불러올까요?')) {
+                    onLoadTemplate(template.nodes, template.edges);
+                  }
+                }}
+              >
+                {template.label}
+              </button>
+            ))}
         </div>
       )}
 
       {/* 관계선 (Relations) */}
       <div className="tool-section" style={{ marginTop: '4px' }}>
-        <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#475569' }}>관계선 (Relations)</h4>
+        <h4 style={sectionTitleStyle}>관계선 (Relations)</h4> {/* 2026-11-18 스타일 */}
         {useCaseRelations.map((tool) => (
           <button
             key={tool.type}
@@ -219,7 +250,7 @@ function UseCaseToolPanel({
         <button
           type="button"
           className="sidebar-action-button"
-          style={{ marginTop: '8px' }}
+          style={{ ...actionButtonStyle, marginTop: '8px' }} // 2026-11-18 스타일
           onClick={onApplyRelationToSelected}
           disabled={!hasSelectedEdge}
         >
@@ -231,7 +262,7 @@ function UseCaseToolPanel({
           <button
             type="button"
             className="sidebar-action-button"
-            style={{ marginTop: '6px' }}
+            style={{ ...actionButtonStyle, marginTop: '6px' }}
             onClick={onReverseEdge}
             disabled={!hasSelectedEdge}
             title="선택한 관계선의 시작과 끝을 바꿉니다"
