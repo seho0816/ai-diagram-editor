@@ -1,5 +1,6 @@
 import type { DiagramEdge, DiagramNode, DiagramType } from '../types/diagram';
 import type { AiEditOperation } from '../types/aiEdits';
+import type { AiIssue } from '../types/ai';
 import { buildUseCaseEditPreview } from './buildUseCaseEditPreview';
 
 const classRelations = new Set([
@@ -31,6 +32,40 @@ function lines(value: unknown): string[] {
   return value;
 }
 
+// Match the server's safety rules: only a confirmed duplicate or an edge
+// specifically marked for removal by the selected analysis issue may be removed.
+function canRemoveClassFlowEdge(
+  edge: DiagramEdge | undefined,
+  edges: DiagramEdge[],
+  diagramType: DiagramType,
+  issue?: AiIssue
+): boolean {
+  const requiredType = diagramType === 'CLASS' ? 'classUmlEdge' : 'flowchartEdge';
+  if (!edge || edge.type !== requiredType) return false;
+  const action = `${issue?.title ?? ''} ${issue?.suggestion ?? ''}`;
+  const issueTargetsRemoval = issue?.targetId === edge.id &&
+    /(제거|삭제|지우|없애|중복|불필요|remove|delete|redundant|duplicate)/i.test(action);
+  const field = (entry: DiagramEdge, key: string): string =>
+    String((entry.data as Record<string, unknown> | undefined)?.[key] ?? '');
+  const redundant = edges.some((other) => {
+    if (other.id === edge.id || other.type !== requiredType ||
+        field(other, 'relationType') !== field(edge, 'relationType')) return false;
+    const sameDirection = edge.source === other.source && edge.target === other.target;
+    if (diagramType === 'FLOWCHART') {
+      return sameDirection && JSON.stringify(edge.data ?? {}) === JSON.stringify(other.data ?? {});
+    }
+    const reverseAssociation = field(edge, 'relationType') === 'association' &&
+      edge.source === other.target && edge.target === other.source;
+    if (!sameDirection && !reverseAssociation) return false;
+    return sameDirection
+      ? field(edge, 'sourceMultiplicity') === field(other, 'sourceMultiplicity') &&
+          field(edge, 'targetMultiplicity') === field(other, 'targetMultiplicity')
+      : field(edge, 'sourceMultiplicity') === field(other, 'targetMultiplicity') &&
+          field(edge, 'targetMultiplicity') === field(other, 'sourceMultiplicity');
+  });
+  return issueTargetsRemoval || redundant;
+}
+
 /** Creates an isolated copy. No modifications are made to live React Flow state. */
 export function buildEditPreview(
   diagramType: DiagramType,
@@ -38,7 +73,8 @@ export function buildEditPreview(
   originalEdges: DiagramEdge[],
   operations: AiEditOperation[],
   purpose = '',
-  businessRule = ''
+  businessRule = '',
+  issue?: AiIssue
 ): PreviewGraph {
   if (diagramType === 'USE_CASE') {
     return buildUseCaseEditPreview(originalNodes, originalEdges, operations, purpose, businessRule);
@@ -54,6 +90,7 @@ export function buildEditPreview(
   const edges: DiagramEdge[] = structuredClone(originalEdges);
   const idAliases = new Map<string, string>();
   const changes: string[] = [];
+  let removedClassFlowEdges = 0;
   const isClass = diagramType === 'CLASS';
   const nodeType = isClass ? 'classNode' : 'flowchartNode';
   const edgeType = isClass ? 'classUmlEdge' : 'flowchartEdge';
@@ -151,6 +188,18 @@ export function buildEditPreview(
         });
       }
       changes.push(`관계선 추가: ${op.source} → ${op.target} (${op.relationType})`);
+    } else if (op.kind === 'REMOVE_EDGE') {
+      const index = edges.findIndex((edge) => edge.id === op.targetId && edge.type === edgeType);
+      const edge = edges[index];
+      const unusedFieldsAreEmpty = !op.tempId && !op.source && !op.target &&
+        !op.relationType && (op.removeAttributes?.length ?? 0) === 0;
+      if (index === -1 || !unusedFieldsAreEmpty || removedClassFlowEdges >= 1 ||
+          !canRemoveClassFlowEdge(edge, edges, diagramType, issue)) {
+        throw new Error('이 관계선은 안전하게 자동 제거할 수 없습니다. 분석 대상과 관계선 종류를 확인해 주세요.');
+      }
+      edges.splice(index, 1);
+      removedClassFlowEdges += 1;
+      changes.push(`관계선 제거: ${edge.source} → ${edge.target} (${edge.data?.relationType ?? '연결'})`);
     } else if (op.kind === 'UPDATE_EDGE') {
       const index = edges.findIndex((edge) => edge.id === op.targetId && edge.type === edgeType);
       if (index === -1 || !relations.has(op.relationType)) {

@@ -16,6 +16,7 @@ import AiPanel from './components/AiPanel';
 import { analyzeDiagram } from './api/ai';
 import type { AiAnalysisResult } from './types/ai';
 import { useAiEditPreview } from './ai/useAiEditPreview';
+import { buildPreviewDiff } from './ai/buildPreviewDiff';
 import UmlEdgeEditModal from './diagrams/class/UmlEdgeEditModal';
 import type { UmlEdgeData } from './diagrams/class/types';
 
@@ -33,6 +34,7 @@ import {
 } from './persistence/diagramStorage';
 
 import './App.css';
+import './ai/previewDiff.css';
 import { FlowchartFeatureProvider } from './diagrams/flowchart/FlowchartFeatures';
 import FlowchartSimulationPanel from './diagrams/flowchart/FlowchartSimulationPanel';
 
@@ -383,7 +385,15 @@ function App() {
     };
 
     const visiblePreview = showEditPreview ? aiEdits.preview : null;
-    const visibleGraph = visiblePreview ?? analysisSnapshot ?? { nodes, edges };
+    const previewDiff = visiblePreview
+        ? buildPreviewDiff(
+            (analysisSnapshot ?? { nodes, edges }).nodes,
+            (analysisSnapshot ?? { nodes, edges }).edges,
+            visiblePreview.nodes,
+            visiblePreview.edges
+          )
+        : null;
+    const visibleGraph = previewDiff ?? analysisSnapshot ?? { nodes, edges };
 
     return (
         <div className="app">
@@ -451,6 +461,17 @@ function App() {
                         : 'AI 분석을 실행하면 현재 다이어그램이 기준으로 보관됩니다.'}
               </span>
                         </div>
+                        {previewDiff && (
+                            <div className="ai-diff-legend" role="status" aria-label="AI 수정 변경 사항">
+                                <span className="ai-diff-summary">
+                                    노드 추가 {previewDiff.nodeCount.added} · 변경 {previewDiff.nodeCount.changed} · 제거 {previewDiff.nodeCount.removed}
+                                    {' / '}관계선 추가 {previewDiff.edgeCount.added} · 변경 {previewDiff.edgeCount.changed} · 제거 {previewDiff.edgeCount.removed}
+                                </span>
+                                <span className="ai-diff-key ai-diff-key--added">추가</span>
+                                <span className="ai-diff-key ai-diff-key--changed">변경</span>
+                                <span className="ai-diff-key ai-diff-key--removed">제거 예정(빨간 점선)</span>
+                            </div>
+                        )}
                         <DiagramCanvas
                             key={visiblePreview ? 'ai-draft' : 'ai-original'}
                             nodes={visibleGraph.nodes}

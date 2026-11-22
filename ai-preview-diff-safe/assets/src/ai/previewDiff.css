@@ -1,0 +1,72 @@
+/* AI 미리보기에서만 적용. 실제 다이어그램의 클래스·선 렌더링은 변경하지 않는다. */
+.ai-analysis-workspace.ai-preview-mode .react-flow__node.ai-diff-added {
+  outline: 3px solid #16a34a;
+  outline-offset: 4px;
+  border-radius: 6px;
+  box-shadow: 0 0 0 6px rgba(22, 163, 74, 0.12);
+}
+.ai-analysis-workspace.ai-preview-mode .react-flow__node.ai-diff-changed {
+  outline: 3px solid #2563eb;
+  outline-offset: 4px;
+  border-radius: 6px;
+  box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.12);
+}
+.ai-analysis-workspace.ai-preview-mode .react-flow__node.ai-diff-removed {
+  outline: 3px dashed #dc2626;
+  outline-offset: 4px;
+  border-radius: 6px;
+  opacity: 0.5;
+  filter: grayscale(0.6);
+  pointer-events: none;
+}
+
+/* Custom BaseEdge 컴포넌트의 인라인 stroke도 미리보기에서만 덮어쓴다. */
+.ai-analysis-workspace.ai-preview-mode .react-flow__edge.ai-diff-added .react-flow__edge-path {
+  stroke: #16a34a !important;
+  stroke-width: 3 !important;
+}
+.ai-analysis-workspace.ai-preview-mode .react-flow__edge.ai-diff-changed .react-flow__edge-path {
+  stroke: #2563eb !important;
+  stroke-width: 3 !important;
+}
+.ai-analysis-workspace.ai-preview-mode .react-flow__edge.ai-diff-removed .react-flow__edge-path {
+  stroke: #dc2626 !important;
+  stroke-width: 3 !important;
+  stroke-dasharray: 8 6 !important;
+}
+.ai-analysis-workspace.ai-preview-mode .react-flow__edge.ai-diff-removed {
+  pointer-events: none;
+}
+
+.ai-diff-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  width: 100%;
+  font-size: 12px;
+}
+.ai-diff-legend .ai-diff-summary {
+  color: #334155;
+  font-size: 12px;
+  font-weight: 600;
+}
+.ai-diff-legend .ai-diff-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #475569;
+  white-space: nowrap;
+}
+.ai-diff-key::before {
+  content: '';
+  display: inline-block;
+  width: 14px;
+  height: 8px;
+  border: 2px solid var(--diff-color);
+  border-radius: 3px;
+}
+.ai-diff-key--added { --diff-color: #16a34a; }
+.ai-diff-key--changed { --diff-color: #2563eb; }
+.ai-diff-key--removed { --diff-color: #dc2626; }
+.ai-diff-key--removed::before { border-style: dashed; }
