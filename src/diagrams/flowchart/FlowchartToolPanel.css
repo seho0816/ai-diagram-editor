@@ -23,3 +23,15 @@
 .flowchart-branch-buttons button:last-child { color: #dc2626; background: #fef2f2; }
 .flowchart-feature-error { color: #b91c1c; font-size: 11px; margin: 0; }
 .flowchart-feature-finished { color: #15803d; font-size: 11px; margin: 0; }
+
+/* Flowchart-only validation and path-test results. */
+.flowchart-inspection-list { margin: 0; padding-left: 18px; display: grid; gap: 8px; font-size: 11px; overflow-wrap: anywhere; }
+.flowchart-inspection-list li { line-height: 1.45; }
+.flowchart-inspection-error strong { color: #b91c1c; }
+.flowchart-inspection-warning strong { color: #b45309; }
+.flowchart-inspection-info strong { color: #2563eb; }
+.flowchart-inspection-ok { margin: 0; font-size: 11px; color: #15803d; }
+.flowchart-path-results { display: grid; gap: 8px; }
+.flowchart-path-results p { font-size: 11px; margin: 0; color: #475569; }
+.flowchart-path-results li span { display: block; }
+.flowchart-path-results li small { display: block; color: #64748b; }

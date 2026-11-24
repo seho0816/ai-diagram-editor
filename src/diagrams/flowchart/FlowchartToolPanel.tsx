@@ -44,7 +44,7 @@ function RelationPreview({ relation }: { relation: FlowchartRelationType }) {
 }
 
 function FlowchartToolPanel({ onAddNode, relationType, onSelectRelationType, onApplyRelationToSelected, hasSelectedEdge }: Props) {
-  const [opened, setOpened] = useState({ basic: true, extended: true, relations: true, layout: true, simulation: true });
+  const [opened, setOpened] = useState({ basic: true, extended: true, relations: true, layout: true, simulation: true, validation: true, paths: true });
   const features = useFlowchartFeatures();
   const toggle = (key: keyof typeof opened) => setOpened((old) => ({ ...old, [key]: !old[key] }));
   return (
@@ -79,6 +79,41 @@ function FlowchartToolPanel({ onAddNode, relationType, onSelectRelationType, onA
         </div>}
       </section>
       {features && <>
+        <section className="flowchart-tool-section">
+          <button type="button" className="flowchart-group-heading" aria-expanded={opened.validation} onClick={() => toggle('validation')}>
+            <span>구조 자동 검증 ({features.validationIssues.filter((issue) => issue.severity === 'error').length}개 오류)</span><span aria-hidden="true">{opened.validation ? '⌃' : '⌄'}</span>
+          </button>
+          {opened.validation && <div className="flowchart-feature-controls" aria-live="polite">
+            {features.validationIssues.length === 0 ? <p className="flowchart-inspection-ok">구조 검증에서 문제가 발견되지 않았습니다.</p> :
+              <ul className="flowchart-inspection-list">{features.validationIssues.map((issue, index) =>
+                <li key={`${issue.code}-${issue.nodeId ?? index}`} className={`flowchart-inspection-${issue.severity}`}>
+                  <strong>{issue.severity === 'error' ? '오류' : issue.severity === 'warning' ? '주의' : '안내'}</strong> {issue.message}
+                </li>
+              )}</ul>}
+          </div>}
+        </section>
+        <section className="flowchart-tool-section">
+          <button type="button" className="flowchart-group-heading" aria-expanded={opened.paths} onClick={() => toggle('paths')}>
+            <span>시뮬레이션 경로 테스트</span><span aria-hidden="true">{opened.paths ? '⌃' : '⌄'}</span>
+          </button>
+          {opened.paths && <div className="flowchart-feature-controls">
+            <button type="button" className="flowchart-primary-action" onClick={features.runPathTests}>전체 경로 테스트</button>
+            {features.pathReport && <div role="status" className="flowchart-path-results">
+              {features.pathReport.message && <p>{features.pathReport.message}</p>}
+              {features.pathReport.results.length > 0 && <>
+                <p>총 {features.pathReport.results.length}개 경로 · 정상 종료 {features.pathReport.results.filter((result) => result.outcome === 'passed').length}개</p>
+                <ol className="flowchart-inspection-list">{features.pathReport.results.map((result, index) =>
+                  <li key={index}>
+                    <strong>{result.outcome === 'passed' ? '통과' : result.outcome === 'cycle' ? '순환' : result.outcome === 'dead-end' ? '중단' : '분기 누락'}</strong>
+                    <span>{result.nodeIds.map((id) => features.nameOf(id)).join(' → ')}</span>
+                    {result.branches.length > 0 && <small>선택: {result.branches.map((branch) => branch === 'yes' ? '예' : '아니오').join(', ')}</small>}
+                  </li>
+                )}</ol>
+              </>}
+              {features.pathReport.truncated && <p>최대 40개 경로까지만 표시했습니다.</p>}
+            </div>}
+          </div>}
+        </section>
         <section className="flowchart-tool-section">
           <button type="button" className="flowchart-group-heading" aria-expanded={opened.layout} onClick={() => toggle('layout')}>
             <span>자동 정렬</span><span aria-hidden="true">{opened.layout ? '⌃' : '⌄'}</span>

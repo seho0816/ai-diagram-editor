@@ -1,9 +1,14 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { DiagramNode, DiagramEdge } from '../../types/diagram';
 import { layoutFlowchart, type LayoutDirection } from './autoLayout';
+import { validateFlowchart, type FlowchartIssue } from './validateFlowchart';
+import { testFlowchartPaths, type FlowchartPathReport } from './testFlowchartPaths';
 import { availableBranches, findStart, getNextEdge, MAX_SIMULATION_STEPS, outgoingEdges, type BranchChoice } from './simulation';
 
 type FeatureContext = {
+  validationIssues: FlowchartIssue[];
+  pathReport: FlowchartPathReport | null;
+  runPathTests: () => void;
   direction: LayoutDirection;
   setDirection: (value: LayoutDirection) => void;
   arrange: () => void;
@@ -30,6 +35,8 @@ export function FlowchartFeatureProvider({ nodes, edges, onArrange, children }: 
   children: ReactNode;
 }) {
   const [direction, setDirection] = useState<LayoutDirection>('vertical');
+  const [pathReport, setPathReport] = useState<FlowchartPathReport | null>(null);
+  const validationIssues = useMemo(() => validateFlowchart(nodes, edges), [nodes, edges]);
   const [history, setHistory] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [finished, setFinished] = useState(false);
@@ -40,7 +47,7 @@ export function FlowchartFeatureProvider({ nodes, edges, onArrange, children }: 
     nodes: nodes.map((n) => [n.id, n.type, n.data]),
     edges: edges.map((e) => [e.id, e.source, e.target, e.data]),
   }), [nodes, edges]);
-  useEffect(() => { setHistory([]); setError(null); setFinished(false); }, [signature]);
+  useEffect(() => { setHistory([]); setError(null); setFinished(false); setPathReport(null); }, [signature]);
 
   const stop = () => { setHistory([]); setError(null); setFinished(false); };
   const start = () => {
@@ -70,6 +77,7 @@ export function FlowchartFeatureProvider({ nodes, edges, onArrange, children }: 
   const previous = () => { setHistory((prev) => prev.slice(0, -1)); setFinished(false); setError(null); };
   const branches = activeNodeId && !finished ? availableBranches(activeNodeId, nodes, edges) : [];
   const value: FeatureContext = {
+    validationIssues, pathReport, runPathTests: () => setPathReport(testFlowchartPaths(nodes, edges)),
     direction, setDirection, arrange: () => {
       const arranged = layoutFlowchart(nodes, edges, direction);
       onArrange(arranged.nodes, arranged.edges);
