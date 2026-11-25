@@ -118,6 +118,32 @@ function App() {
     };
     // ===== 2026-11-12 추가 끝 =====
 
+    // ===== 2026-11-18 추가: 유스케이스 자동 정렬용 (이규찬) =====
+    const applyAutoLayout = (
+        layout: (nodes: DiagramNode[], edges: DiagramEdge[]) => DiagramNode[]
+    ) => {
+        setNodes((current) => layout(current, edges));
+    };
+    // ===== 2026-11-18 추가 끝 =====
+
+    // ===== 2026-11-18 추가: 관계선 방향 반전용 (이규찬) =====
+    const reverseSelectedEdges = () => {
+        setEdges((current) =>
+            current.map((edge) =>
+                edge.selected
+                    ? {
+                        ...edge,
+                        source: edge.target,
+                        target: edge.source,
+                        sourceHandle: edge.targetHandle,
+                        targetHandle: edge.sourceHandle,
+                    }
+                    : edge
+            )
+        );
+    };
+    // ===== 2026-11-18 추가 끝 =====
+
     const handleNodeDoubleClick: NodeMouseHandler<DiagramNode> = (
         _event,
         node
@@ -485,6 +511,8 @@ function App() {
                         hasSelectedEdge={hasSelectedEdge}
                         hasSelection={hasSelection}
                         onLoadTemplate={loadTemplate} // ===== 2026-11-12 추가 (템플릿) =====
+                        onAutoLayout={applyAutoLayout} // ===== 2026-11-18 추가 (자동 정렬) =====
+                        onReverseEdge={reverseSelectedEdges} // ===== 2026-11-18 추가 (관계선 방향 반전) =====
                     />
                     <div className="flowchart-canvas-host">
                     <DiagramCanvas

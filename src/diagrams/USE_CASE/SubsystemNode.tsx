@@ -16,7 +16,7 @@ export function SubsystemNode({ data, selected }: NodeProps) {
         isVisible={selected}
         minWidth={200}
         minHeight={150}
-        lineStyle={{ borderColor: '#2563eb' }}
+        lineStyle={{ borderColor: '#1d4ed8' }} // 2026-11-18 스타일
         handleStyle={{ width: 8, height: 8, borderRadius: 2 }}
       />
       <div
@@ -27,11 +27,9 @@ export function SubsystemNode({ data, selected }: NodeProps) {
           minHeight: 150,
           boxSizing: 'border-box',
           padding: 20,
-          border: selected ? '2.5px dashed #2563eb' : '2px dashed #3182ce',
-          borderRadius: '8px',
-          background: selected
-            ? 'rgba(37, 99, 235, 0.10)'
-            : 'rgba(49, 130, 206, 0.05)',
+          border: selected ? '3px dashed #1d4ed8' : '2.5px dashed #2563eb', // 2026-11-18 스타일
+          borderRadius: '10px', // 2026-11-18 스타일
+          background: selected ? '#bfdbfe' : '#dbeafe', // 2026-11-18 스타일
         }}
       >
         {handles.map((h) => (
@@ -41,6 +39,7 @@ export function SubsystemNode({ data, selected }: NodeProps) {
             type="source"
             position={h.position}
             style={{
+              background: '#1d4ed8', // 2026-11-18 스타일
               opacity: selected ? 1 : 0,
               transition: 'opacity 0.15s',
             }}
@@ -48,9 +47,9 @@ export function SubsystemNode({ data, selected }: NodeProps) {
         ))}
         <div
           style={{
-            fontWeight: 'bold',
-            fontSize: '14px',
-            color: '#1e293b',
+            fontWeight: 800, // 2026-11-18 스타일
+            fontSize: '16px', // 2026-11-18 스타일
+            color: '#0f172a', // 2026-11-18 스타일
             marginBottom: 10,
           }}
         >
