@@ -96,7 +96,7 @@ export function useAiEditPreview({
         }
         throw new Error(explanation || '이 항목은 자동 수정할 내용을 찾지 못했습니다.');
       }
-      const draft = buildEditPreview(diagramType, nodes, edges, response.operations, purpose, businessRule);
+      const draft = buildEditPreview(diagramType, nodes, edges, response.operations, purpose, businessRule, issue);
       setPreview({
         baseSignature,
         issueIndex,

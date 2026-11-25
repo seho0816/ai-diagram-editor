@@ -63,8 +63,38 @@ function textLines(value) {
     : null;
 }
 
+// The AI may remove at most one CLASS/FLOWCHART edge per proposal.
+// An edge is removable only when it is provably redundant or the chosen issue
+// explicitly identifies that edge and asks for its removal. This does not
+// constrain a user's freehand editing.
+function canRemoveClassFlowEdge(edge, edges, diagramType, issue) {
+  const requiredType = diagramType === 'CLASS' ? 'classUmlEdge' : 'flowchartEdge';
+  if (!edge || edge.type !== requiredType) return false;
+  const action = `${issue?.title ?? ''} ${issue?.suggestion ?? ''}`;
+  const issueTargetsRemoval = issue?.targetId === edge.id &&
+    /(제거|삭제|지우|없애|중복|불필요|remove|delete|redundant|duplicate)/i.test(action);
+  const redundant = edges.some((other) => {
+    if (other.id === edge.id || other.type !== requiredType ||
+        other.data?.relationType !== edge.data?.relationType) return false;
+    const sameDirection = edge.source === other.source && edge.target === other.target;
+    if (diagramType === 'FLOWCHART') {
+      return sameDirection && JSON.stringify(edge.data ?? {}) === JSON.stringify(other.data ?? {});
+    }
+    const reverseAssociation = edge.data?.relationType === 'association' &&
+      edge.source === other.target && edge.target === other.source;
+    if (!sameDirection && !reverseAssociation) return false;
+    const multiplicity = (record, side) => record?.data?.[side] ?? '';
+    return sameDirection
+      ? multiplicity(edge, 'sourceMultiplicity') === multiplicity(other, 'sourceMultiplicity') &&
+          multiplicity(edge, 'targetMultiplicity') === multiplicity(other, 'targetMultiplicity')
+      : multiplicity(edge, 'sourceMultiplicity') === multiplicity(other, 'targetMultiplicity') &&
+          multiplicity(edge, 'targetMultiplicity') === multiplicity(other, 'sourceMultiplicity');
+  });
+  return issueTargetsRemoval || redundant;
+}
+
 // Model output is untrusted. Invalid or unsupported operations are discarded.
-export function normalizeAiEditProposal(raw, { diagramType, purpose = '', businessRule = '', nodes, edges }) {
+export function normalizeAiEditProposal(raw, { diagramType, purpose = '', businessRule = '', nodes, edges, issue = null }) {
   const nodeType = diagramType === 'CLASS' ? 'classNode' : 'flowchartNode';
   const isUseCase = diagramType === 'USE_CASE';
   const edgeType = diagramType === 'CLASS' ? 'classUmlEdge' : isUseCase ? 'umlEdge' : 'flowchartEdge';
@@ -150,6 +180,17 @@ export function normalizeAiEditProposal(raw, { diagramType, purpose = '', busine
         };
       }
     } else if (op.kind === 'REMOVE_EDGE') {
+      if (diagramType === 'CLASS' || diagramType === 'FLOWCHART') {
+        const edge = edgeDetails.get(op.targetId);
+        const unusedFieldsAreEmpty = !op.tempId && !op.source && !op.target &&
+          !op.relationType && op.removeAttributes.length === 0;
+        if (!unusedFieldsAreEmpty || operations.some((item) => item.kind === 'REMOVE_EDGE') ||
+            !canRemoveClassFlowEdge(edge, edges, diagramType, issue)) {
+          return { description: '제거할 관계선을 안전하게 확인하지 못했습니다. 해당 관계선을 직접 선택하거나 다시 분석해 주세요.', operations: [] };
+        }
+        operations.push(op);
+        continue;
+      }
       // Only remove an existing include/extend link between two use cases.
       // No node deletion, no arbitrary edge deletion, and no ungrounded changes.
       if (!isUseCase || op.removeAttributes.length) continue;

@@ -11,6 +11,7 @@ type Props = {
     analyzing: boolean;
     diagramType: DiagramType;
     onDiagramTypeChange: (diagramType: DiagramType) => void;
+    analysisModeLocked?: boolean;
 };
 
 function TopToolbar({
@@ -23,6 +24,7 @@ function TopToolbar({
                         analyzing,
                         diagramType,
                         onDiagramTypeChange,
+                        analysisModeLocked = false,
                     }: Props) {
     const importInputRef = useRef<HTMLInputElement>(null);
 
@@ -33,18 +35,18 @@ function TopToolbar({
                 <div className="diagram-mode-selector" role="group" aria-label="다이어그램 종류">
                     <span className="diagram-mode-title">다이어그램</span>
                     <div className="diagram-mode-options">
-                        <button type="button" className={`diagram-mode-button ${diagramType === 'CLASS' ? 'selected' : ''}`} aria-pressed={diagramType === 'CLASS'} onClick={() => onDiagramTypeChange('CLASS')}>클래스</button>
-                        <button type="button" className={`diagram-mode-button ${diagramType === 'FLOWCHART' ? 'selected' : ''}`} aria-pressed={diagramType === 'FLOWCHART'} onClick={() => onDiagramTypeChange('FLOWCHART')}>플로우차트</button>
+                        <button type="button" className={`diagram-mode-button ${diagramType === 'CLASS' ? 'selected' : ''}`} aria-pressed={diagramType === 'CLASS'} disabled={analysisModeLocked} onClick={() => onDiagramTypeChange('CLASS')}>클래스</button>
+                        <button type="button" className={`diagram-mode-button ${diagramType === 'FLOWCHART' ? 'selected' : ''}`} aria-pressed={diagramType === 'FLOWCHART'} disabled={analysisModeLocked} onClick={() => onDiagramTypeChange('FLOWCHART')}>플로우차트</button>
                         {/* 2026-11-12 추가: 유스케이스 전환 버튼 */}
-                        <button type="button" className={`diagram-mode-button ${diagramType === 'USE_CASE' ? 'selected' : ''}`} aria-pressed={diagramType === 'USE_CASE'} onClick={() => onDiagramTypeChange('USE_CASE')}>유스케이스</button>
+                        <button type="button" className={`diagram-mode-button ${diagramType === 'USE_CASE' ? 'selected' : ''}`} aria-pressed={diagramType === 'USE_CASE'} disabled={analysisModeLocked} onClick={() => onDiagramTypeChange('USE_CASE')}>유스케이스</button>
                     </div>
                 </div>
-                <button onClick={onReset}>초기화</button>
+                <button disabled={analysisModeLocked} onClick={onReset}>초기화</button>
             </div>
 
             <div className="toolbar-right">
                 <button type="button" onClick={onSave}>저장</button>
-                <button type="button" onClick={onLoad}>불러오기</button>
+                <button type="button" disabled={analysisModeLocked} onClick={onLoad}>불러오기</button>
                 <button type="button" onClick={onExportJson}>JSON 내보내기</button>
                 <button type="button" onClick={() => importInputRef.current?.click()}>JSON 가져오기</button>
                 <input
