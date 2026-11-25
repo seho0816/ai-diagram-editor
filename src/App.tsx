@@ -12,6 +12,7 @@ import type { DiagramNode, DiagramEdge, DiagramType } from './types/diagram';
 import type { DiagramRelationType } from './diagrams/toolPanelTypes';
 import { diagramRegistry, updateEdgeRelation } from './diagrams/registry';
 import { classDiagramConfig } from './diagrams/class/config';
+import { createClassExample, type ClassExampleId } from './diagrams/class/classExamples';
 import AiPanel from './components/AiPanel';
 import { analyzeDiagram } from './api/ai';
 import type { AiAnalysisResult } from './types/ai';
@@ -54,6 +55,7 @@ function App() {
     const [edges, setEdges, onEdgesChange] = useEdgesState<DiagramEdge>(
         structuredClone(diagramRegistry.CLASS.initialEdges)
     );
+    const [classExampleRevision, setClassExampleRevision] = useState(0);
     const [relationType, setRelationType] = useState<DiagramRelationType>(
         diagramRegistry.CLASS.defaultRelationType
     );
@@ -197,6 +199,7 @@ function App() {
     };
 
     const changeDiagramType = (type: DiagramType) => {
+        if (aiPanelOpen) return; // AI 분석 화면에서는 다이어그램 종류를 전환하지 않는다.
         setDiagramType(type);
         resetDiagram(type);
     };
@@ -296,6 +299,33 @@ function App() {
         }
     };
 
+    const loadClassExample = (exampleId: ClassExampleId) => {
+        if (diagramType !== 'CLASS') return;
+        const edgeType = diagramRegistry.CLASS.initialEdges[0]?.type ?? 'umlEdge';
+        const example = createClassExample(exampleId, edgeType);
+        if (!window.confirm(
+            `현재 캔버스 내용이 사라집니다.\n저장하지 않은 변경 사항도 사라집니다.\n\n'${example.info.title}' 사례를 불러오시겠습니까?`
+        )) return;
+
+        // 이미 실행 중이던 AI 결과가 새 사례를 덮지 않도록 무효화한다.
+        analysisRequestId.current += 1;
+        aiEdits.cancel();
+        setAiLoading(false);
+        setAiResult(null);
+        setAiError(null);
+        setAnalysisSnapshot(null);
+        setShowEditPreview(false);
+        setEditingNodeId(null);
+        setEditingEdgeId(null);
+        setRelationType(diagramRegistry.CLASS.defaultRelationType);
+        setDiagramPurpose(example.info.purpose);
+        setNodes(example.nodes);
+        setEdges(example.edges);
+        // React Flow의 fitView를 새 그래프에 대해 다시 수행한다.
+        setClassExampleRevision((current) => current + 1);
+    };
+
+
     const runAiAnalysis = async () => {
         if (aiLoading) return;
         aiEdits.cancel();
@@ -384,6 +414,21 @@ function App() {
         }
     };
 
+    const openAiAnalysisPanel = () => {
+        // 캔버스의 최신 상태를 AI 분석 진입 시점에 즉시 고정한다.
+        analysisRequestId.current += 1;
+        aiEdits.cancel();
+        setAiLoading(false);
+        setAiResult(null);
+        setAiError(null);
+        setShowEditPreview(false);
+        setAnalysisSnapshot({
+            nodes: structuredClone(nodes),
+            edges: structuredClone(edges),
+        });
+        setAiPanelOpen(true);
+    };
+
     const visiblePreview = showEditPreview ? aiEdits.preview : null;
     const previewDiff = visiblePreview
         ? buildPreviewDiff(
@@ -401,7 +446,8 @@ function App() {
                 onReset={() => resetDiagram()}
                 diagramType={diagramType}
                 onDiagramTypeChange={changeDiagramType}
-                onAnalyze={() => setAiPanelOpen(true)}
+                analysisModeLocked={aiPanelOpen}
+                onAnalyze={openAiAnalysisPanel}
                 analyzing={aiLoading}
                 onSave={handleSaveDiagram}
                 onLoad={handleLoadDiagram}
@@ -451,13 +497,13 @@ function App() {
                             <strong>
                                 {visiblePreview
                                     ? 'AI 수정안 미리보기'
-                                    : analysisSnapshot ? '분석 당시 다이어그램' : '현재 다이어그램'}
+                                    : analysisSnapshot ? 'AI 분석 기준 다이어그램' : '현재 다이어그램'}
                             </strong>
                             <span>
                 {visiblePreview
                     ? '승인하기 전까지 실제 다이어그램은 바뀌지 않습니다.'
                     : analysisSnapshot
-                        ? 'AI 분석에 사용한 원본 상태입니다.'
+                        ? 'AI 분석 화면을 연 시점의 다이어그램입니다.'
                         : 'AI 분석을 실행하면 현재 다이어그램이 기준으로 보관됩니다.'}
               </span>
                         </div>
@@ -499,6 +545,7 @@ function App() {
                     <ShapeSidebar
                         diagramType={diagramType}
                         onAddNode={addNode}
+                        onLoadClassExample={loadClassExample}
                         relationType={relationType}
                         onSelectRelationType={setRelationType}
                         onApplyRelationToSelected={applyRelationToSelected}
@@ -509,7 +556,7 @@ function App() {
                     />
                     <div className="flowchart-canvas-host">
                     <DiagramCanvas
-                        key={canvasInstance}
+                        key={[(canvasInstance), classExampleRevision].join(':')}
                         nodes={nodes}
                         edges={edges}
                         onNodesChange={onNodesChange}

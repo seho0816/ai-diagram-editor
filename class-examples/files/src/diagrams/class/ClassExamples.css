@@ -1,0 +1,36 @@
+.class-example-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.class-example-button {
+  display: block;
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  color: #334155;
+  text-align: left;
+  cursor: pointer;
+}
+
+.class-example-button:hover,
+.class-example-button:focus-visible {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.class-example-button strong {
+  display: block;
+  font-size: 12px;
+}
+
+.class-example-button span {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #64748b;
+}

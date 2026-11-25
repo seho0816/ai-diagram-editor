@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import DiagramToolGroup from './DiagramToolGroup';
 import ClassToolPanel from '../diagrams/class/ClassToolPanel';
+import type { ClassExampleId } from '../diagrams/class/classExamples';
 import UseCaseToolPanel from '../diagrams/USE_CASE/UseCaseToolPanel';
 import FlowchartToolPanel from '../diagrams/flowchart/FlowchartToolPanel';
 import type { DiagramRelationType } from '../diagrams/toolPanelTypes';
@@ -9,6 +10,7 @@ import type { DiagramType, DiagramNode, DiagramEdge } from '../types/diagram'; /
 export interface ShapeSidebarProps {
   diagramType?: DiagramType;
   onAddNode: (diagramType: DiagramType, toolType: string) => void;
+  onLoadClassExample: (exampleId: ClassExampleId) => void;
   relationType: DiagramRelationType;
   onSelectRelationType: (type: DiagramRelationType) => void;
   onApplyRelationToSelected: () => void;
@@ -23,6 +25,7 @@ export interface ShapeSidebarProps {
 function ShapeSidebar({
   diagramType = 'CLASS',
   onAddNode,
+  onLoadClassExample,
   relationType,
   onSelectRelationType,
   onApplyRelationToSelected,
@@ -51,6 +54,7 @@ function ShapeSidebar({
           >
             <ClassToolPanel
               onAddNode={(toolType) => onAddNode('CLASS', toolType)}
+              onLoadExample={onLoadClassExample}
               relationType={relationType}
               onSelectRelationType={onSelectRelationType}
             />
